@@ -1,0 +1,4 @@
+(begin 
+    (def hello "hello")
+    (nth 1 ARGS)
+    (#0 ARGS))
