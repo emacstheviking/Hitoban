@@ -206,43 +206,22 @@ cell proc_nth(const cells& c)
         long n = to_long(c[0].val);
         cell tmp = c[1];
         const cell temp = tmp.get_in(n);
-        cell result;
-        if (temp.type == List || temp.type == Dict)
-        {
-            result.type = temp.type;
 
-            if (result.type == List)
-                result.list = temp.list;
-            else if (result.type == Dict)
-                result.dict = temp.dict;
-        }
-        else
-        {
-            result.type = temp.type;
-            result.val = temp.val;
-        }
+        COPY(temp, result)
 
         return result;
     }
     else if (c[1].type == Dict)
     {
         cell tmp = c[1];
-        const cell temp = tmp.get_in(c[0].val);
-        cell result;
-        if (temp.type == List || temp.type == Dict)
+        if (c[0].type != String)
         {
-            result.type = temp.type;
+            std::stringstream ss; ss << "A key for a dict should always be a string, not of type " << convert_htbtype(c[0].type) << std::endl;
+            return cell(Exception, ss.str());
+        }
+        const cell temp = tmp.get_in(c[0].val.substr(1, c[0].val.size() - 2));
 
-            if (result.type == List)
-                result.list = temp.list;
-            else if (result.type == Dict)
-                result.dict = temp.dict;
-        }
-        else
-        {
-            result.type = temp.type;
-            result.val = temp.val;
-        }
+        COPY(temp, result)
 
         return result;
     }
@@ -257,32 +236,32 @@ cell proc_dict(const cells& c)
 {
     cell result(Dict);
 
-    cell::map m;
-    for (cellit i = c[1].list.begin(); i != c[1].list.end(); ++i)
+    for (unsigned int i = 0; i < c.size(); ++i)
     {
-        if ((*i).type != List)
+        COPY(c[i], temp)
+
+        if (temp.type != List)
         {
-            std::stringstream ss; ss << "Arguments of dict should be list" << std::endl;
+            std::stringstream ss; ss << "Arguments of dict should be lists, not " << convert_htbtype(temp.type) << std::endl;
             return cell(Exception, ss.str());
         }
-        else if ((*i).list[0].type != String)
+        else if (temp.list[0].type != String)
         {
-            std::stringstream ss; ss << "Keys in dict should only be strings" << std::endl;
+            std::stringstream ss; ss << "Keys in dict should only be strings, not " << convert_htbtype(temp.type) << std::endl;
             return cell(Exception, ss.str());
         }
         else
         {
-            std::string key((*i).list[0].val);
-            if ((*i).list.size() > 2)  // we have more than 2 elements, not normal
+            std::string key(temp.list[0].val);
+            if (temp.list.size() > 2)  // we have more than 2 elements, not normal
             {
-                std::stringstream ss; ss << "Tuples to define (key value) in dict should not be of size " << (*i).list.size() << std::endl;
+                std::stringstream ss; ss << "Lists to define (key value) in dict should not be of size " << temp.list.size() << std::endl;
                 return cell(Exception, ss.str());
             }
-            m[key.substr(1, key.size() - 2)] = (*i).list[1];
+            COPY(temp.list[1], v)
+            result.dict[key.substr(1, key.size() - 2)] = v;
         }
     }
-
-    result.dict = m;
 
     return result;
 }

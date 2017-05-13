@@ -5,6 +5,14 @@
 #include "htb_functions.hpp"
 #include "htb_cell.hpp"
 
+#define COPY(base, dest) cell dest(base.type); \
+        if (dest.type == List) \
+            dest.list = base.list; \
+        else if (dest.type == Dict) \
+            dest.dict = base.dict; \
+        else \
+            dest.val = base.val;
+
 namespace htb
 {
 

@@ -64,10 +64,11 @@ cell eval(cell x, environment* env)
                 std::stringstream ss; ss << x.list[0].val << " is not a valid key (length must be > 0)" << std::endl;
                 return cell(Exception, ss.str());
             }
-            if (x.list[1].type == Dict)
-                return eval(x.list[1], env).get_in(key);
+            cell c(eval(x.list[1], env));
+            if (c.type == Dict)
+                return c.get_in(key);
             else
-                return eval(x.list[1], env).get_in(to_long(key));
+                return c.get_in(to_long(key));
         }
         if (x.list[0].val == "quote")       // (quote exp)
             return x.list[1];
@@ -333,7 +334,10 @@ int tests()
     TEST("(get-hidden)", "0");
     TEST("(set-hidden 1234)", "1234");
     TEST("(get-hidden)", "1234");
-    TEST("(def dico (dict (\"hello\" 1) (\"other\" (list 4 5 6))))", "<Dict>");
+    TEST("(def dico (dict (list \"hello\" 1) (list \"other\" (list 4 5 6))))", "<Dict>");
+    TEST("(nth \"hello\" dico)", "1");
+    TEST("(#other dico)", "(4 5 6)");
+    TEST("(#hello dico)", "1");
     /*TEST("(def facul (lambda (a (b 2) (c 1)) (+ a b c)))", "<Lambda>");
     TEST("(facul 1)", "4");
     TEST("(facul 1 _ 2)", "5");

@@ -46,12 +46,20 @@ struct cell
 
     cell get_in(const std::string& key)
     {
-        if (!dict.empty() && type == Dict)
+        if (type == Dict)
         {
-            if (dict.find(key) != dict.end())
-                return dict[key];
-            std::stringstream ss; ss << "Can not find the key " << key << " in the dict" << std::endl;
-            return cell(Exception, ss.str());
+            if (!dict.empty())
+            {
+                if (dict.find(key) != dict.end())
+                    return dict[key];
+                std::stringstream ss; ss << "Can not find the key " << key << " in the dict" << std::endl;
+                return cell(Exception, ss.str());
+            }
+            else
+            {
+                std::stringstream ss; ss << "Can not access an element with the key " << key << " because the dict is empty" << std::endl;
+                return cell(Exception, ss.str());
+            }
         }
         else
         {
