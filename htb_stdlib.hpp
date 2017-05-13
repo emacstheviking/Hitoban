@@ -29,6 +29,8 @@ cell proc_cons(const cells& c);
 cell proc_list(const cells& c);
 cell proc_nth(const cells& c);
 
+cell proc_dict(const cells& c);
+
 std::map<std::string, cell> get_builtin();
 
 } // namespace htb

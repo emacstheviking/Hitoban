@@ -10,7 +10,7 @@ namespace htb
 
 static bool strict = false;
 const std::vector<std::regex> regexs = {
-    std::regex("^['\"].+['\"]"),                                 // strings
+    std::regex("^['\"][^'\"]+['\"]"),                                 // strings
     std::regex("^[\\(\\)]"),                                      // parenthesis
     std::regex("^((\\+|-)?[[:digit:]]+)(\\.(([[:digit:]]+)?))?((e|E)((\\+|-)?)[[:digit:]]+)?"),                  // numbers
     std::regex("^[#@$':_!?\\-\\w]+"),                   // words
@@ -196,9 +196,6 @@ std::list<std::string> tokenize(const std::string& str)
         }
     }
 
-    for (auto& v: tokens)
-        std::cout << v << std::endl;
-
     return tokens;
 }
 
@@ -254,6 +251,8 @@ std::string to_string(const cell& exp)
         return "<Proc>";
     else if (exp.type == Exception)
         return (strict) ? ("<Exception> " + exp.val) : "<Exception>";
+    else if (exp.type == Dict)
+        return "<Dict>";
     return exp.val;
 }
 
@@ -334,6 +333,7 @@ int tests()
     TEST("(get-hidden)", "0");
     TEST("(set-hidden 1234)", "1234");
     TEST("(get-hidden)", "1234");
+    TEST("(def dico (dict (\"hello\" 1) (\"other\" (list 4 5 6))))", "<Dict>");
     /*TEST("(def facul (lambda (a (b 2) (c 1)) (+ a b c)))", "<Lambda>");
     TEST("(facul 1)", "4");
     TEST("(facul 1 _ 2)", "5");

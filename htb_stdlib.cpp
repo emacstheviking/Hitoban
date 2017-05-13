@@ -253,6 +253,40 @@ cell proc_nth(const cells& c)
     }
 }
 
+cell proc_dict(const cells& c)
+{
+    cell result(Dict);
+
+    cell::map m;
+    for (cellit i = c[1].list.begin(); i != c[1].list.end(); ++i)
+    {
+        if ((*i).type != List)
+        {
+            std::stringstream ss; ss << "Arguments of dict should be list" << std::endl;
+            return cell(Exception, ss.str());
+        }
+        else if ((*i).list[0].type != String)
+        {
+            std::stringstream ss; ss << "Keys in dict should only be strings" << std::endl;
+            return cell(Exception, ss.str());
+        }
+        else
+        {
+            std::string key((*i).list[0].val);
+            if ((*i).list.size() > 2)  // we have more than 2 elements, not normal
+            {
+                std::stringstream ss; ss << "Tuples to define (key value) in dict should not be of size " << (*i).list.size() << std::endl;
+                return cell(Exception, ss.str());
+            }
+            m[key.substr(1, key.size() - 2)] = (*i).list[1];
+        }
+    }
+
+    result.dict = m;
+
+    return result;
+}
+
 ///////////////////////////////////////////////////// built-in functions
 std::map<std::string, cell> get_builtin()
 {
@@ -276,6 +310,8 @@ std::map<std::string, cell> get_builtin()
     builtin["<"] = cell(&proc_less);
     builtin["<="] = cell(&proc_less_equal);
     builtin["="] = cell(&proc_eq);
+    /* dictionary */
+    builtin["dict"] = cell(&proc_dict);
 
     return builtin;
 }
