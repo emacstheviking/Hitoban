@@ -338,6 +338,8 @@ int tests()
     TEST("(nth \"hello\" dico)", "1");
     TEST("(#other dico)", "(4 5 6)");
     TEST("(#hello dico)", "1");
+    TEST("(keys dico)", "(\"hello\" \"other\")");
+    TEST("(values dico)", "(1 (4 5 6))");
     /*TEST("(def facul (lambda (a (b 2) (c 1)) (+ a b c)))", "<Lambda>");
     TEST("(facul 1)", "4");
     TEST("(facul 1 _ 2)", "5");

@@ -266,6 +266,54 @@ cell proc_dict(const cells& c)
     return result;
 }
 
+cell proc_keys(const cells& c)
+{
+    if (c.size() != 1)
+    {
+        std::stringstream ss; ss << "'keys' take only one parameter : a dict" << std::endl;
+        return cell(Exception, ss.str());
+    }
+    if (c[0].type != Dict)
+    {
+        std::stringstream ss; ss << "'keys' argument should be a dict, not a " << convert_htbtype(c[0].type) << std::endl;
+        return cell(Exception, ss.str());
+    }
+    cell result(List);
+
+    for (auto kv: c[0].dict)
+    {
+        cell k(String);
+        k.val = "\"" + kv.first + "\"";
+
+        result.list.push_back(k);
+    }
+
+    return result;
+}
+
+cell proc_values(const cells& c)
+{
+    if (c.size() != 1)
+    {
+        std::stringstream ss; ss << "'values' take only one parameter : a dict" << std::endl;
+        return cell(Exception, ss.str());
+    }
+    if (c[0].type != Dict)
+    {
+        std::stringstream ss; ss << "'values' argument should be a dict, not a " << convert_htbtype(c[0].type) << std::endl;
+        return cell(Exception, ss.str());
+    }
+    cell result(List);
+
+    for (auto kv: c[0].dict)
+    {
+        COPY(kv.second, v)
+        result.list.push_back(v);
+    }
+
+    return result;
+}
+
 ///////////////////////////////////////////////////// built-in functions
 std::map<std::string, cell> get_builtin()
 {
@@ -291,6 +339,8 @@ std::map<std::string, cell> get_builtin()
     builtin["="] = cell(&proc_eq);
     /* dictionary */
     builtin["dict"] = cell(&proc_dict);
+    builtin["keys"] = cell(&proc_keys);
+    builtin["values"] = cell(&proc_values);
 
     return builtin;
 }

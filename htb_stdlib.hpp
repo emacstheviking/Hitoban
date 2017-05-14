@@ -38,6 +38,8 @@ cell proc_list(const cells& c);
 cell proc_nth(const cells& c);
 
 cell proc_dict(const cells& c);
+cell proc_keys(const cells& c);
+cell proc_values(const cells& c);
 
 std::map<std::string, cell> get_builtin();
 
