@@ -93,7 +93,40 @@ typedef cells::const_iterator cellit;
 const cell false_sym(Symbol, "false");
 const cell true_sym(Symbol, "true"); // anything that isn't false_sym is true
 const cell nil(Symbol, "nil");
-const cell skip(Symbol, "_");
+
+inline bool compare_cells(const cell& a, const cell& b)
+{
+    if (a.list.empty() && b.list.empty() && a.dict.empty() && b.dict.empty())
+        return (a.type == b.type && a.val == b.val && a.proc == b.proc && a.const_expr == b.const_expr);
+    else if (!a.list.empty() && !b.list.empty() && a.dict.empty() && b.dict.empty())
+    {
+        bool r = (a.type == b.type && a.val == b.val && a.proc == b.proc && a.const_expr == b.const_expr && a.list.size() == b.list.size());
+        if (!r)
+            return false;
+        for (unsigned int i=0; i < a.list.size(); ++i)
+        {
+            if (!compare_cells(a.list[i], b.list[i]))
+                return false;
+        }
+        return true;
+    }
+    else if (a.list.empty() && b.list.empty() && !a.dict.empty() && !b.dict.empty())
+    {
+        bool r = (a.type == b.type && a.val == b.val && a.proc == b.proc && a.const_expr == b.const_expr && a.dict.size() == b.dict.size());
+        if (!r)
+            return false;
+        for (auto kv: a.dict)
+        {
+            if (b.dict.find(kv.first) == a.dict.end())
+                return false;
+            if (!compare_cells(kv.second, b.dict.find(kv.first)->second))
+                return false;
+        }
+        return true;
+    }
+
+    return false;
+}
 
 ///////////////////////////////////////////////////// environment
 
@@ -103,19 +136,6 @@ struct environment {
     environment(environment* outer=0) :
         outer_(outer)
     {}
-
-    /**environment(const cells& parms, const cells& args, environment* outer, bool) :
-        outer_(outer)
-    {
-        cellit a = args.begin();
-        for (cellit p = parms.begin(); p != parms.end(); ++p)
-        {
-            if (p->type == List && ((*a).val == "_" || a == args.end()))
-                env_[p->list[0].val] = p->list[1];
-            else
-                env_[p->val] = *a++;
-        }
-    }*/
 
     environment(const cells& parms, const cells& args, environment* outer) :
         outer_(outer)

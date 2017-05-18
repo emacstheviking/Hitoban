@@ -10,12 +10,13 @@ namespace htb
 
 static bool strict = false;
 const std::vector<std::regex> regexs = {
-    std::regex("^['\"][^'\"]+['\"]"),                                 // strings
+    std::regex("^['\"][^'\"]+['\"]"),                         // strings
     std::regex("^[\\(\\)]"),                                      // parenthesis
     std::regex("^((\\+|-)?[[:digit:]]+)(\\.(([[:digit:]]+)?))?((e|E)((\\+|-)?)[[:digit:]]+)?"),                  // numbers
     std::regex("^[#@$':_!?\\-\\w]+"),                   // words
     std::regex("^(\\+|-|\\*|/|%|<=|>=|!=|<|>|=)"),    // operators
-    std::regex("^\\s+")                                          // whitespaces
+    std::regex("^\\s+"),                                         // whitespaces
+    std::regex("^;.*")                                            // comments
 };
 
 // define the bare minimum set of primitives necessary to pass the unit tests
@@ -24,7 +25,6 @@ void add_globals(environment& env)
     env["nil"] = nil;
     env["false"] = false_sym;
     env["true"] = true_sym;
-    env["_"] = skip;
 
     for(const auto& v : get_builtin())
         env[v.first] = v.second;
@@ -74,9 +74,9 @@ cell eval(cell x, environment* env)
             return x.list[1];
         if (x.list[0].val == "if")          // (if test conseq [alt])
         {
-            std::string v("nil");
+            std::string v(nil.val);
             if (x.list[1].type == List)
-                v = "false";
+                v = false_sym.val;
             return eval(eval(x.list[1], env).val == v ? (x.list.size() < 4 ? nil : x.list[3]) : x.list[2], env);
         }
         if (x.list[0].val == "set!")        // (set! var exp)
@@ -91,7 +91,7 @@ cell eval(cell x, environment* env)
             return (*env)[x.list[1].val] = eval(x.list[2], env);
         if (x.list[0].val == "const")   // (const var exp)
         {
-            cell c = eval(x.list[2],env);
+            cell c = eval(x.list[2], env);
             c.const_expr = true;
             return (*env)[x.list[1].val] = c;
         }
@@ -109,6 +109,38 @@ cell eval(cell x, environment* env)
             for (size_t i = 1; i < x.list.size() - 1; ++i)
                 eval(x.list[i], env);
             return eval(x.list[x.list.size() - 1], env);
+        }
+        if (x.list[0].val == "require") // (require exp); exp as a list or a dict
+        {
+            if (x.list.size() != 2)
+            {
+                std::stringstream ss; ss << "require' takes only 1 argument, not " << x.list.size() << std::endl;
+                return cell(Exception, ss.str());
+            }
+            environment sub = environment(env);
+            cell c = eval(x.list[1], env);
+            if (c.type == List)
+            {
+                for (cellit i = c.list.begin(); i != c.list.end(); i++)
+                {
+                    // result.list.push_back(*i);
+                }
+            }
+            else if (c.type == Dict)
+            {
+                for (auto kv: c.dict)
+                {
+                    //
+                }
+            }
+            else
+            {
+                std::stringstream ss; ss << "require' takes a dict or a list as an argument, not a " << convert_htbtype(c.type) << std::endl;
+                return cell(Exception, ss.str());
+            }
+
+            // we do not have to return anything, we are just loading files in sub-environment(s)
+            return nil;
         }
     }
 
@@ -131,8 +163,20 @@ cell eval(cell x, environment* env)
     }
     else if (proc.type == Proc)
         return proc.proc(exps);
-
-    return cell(Exception, "Not a function");
+    else
+    {
+        // we have something like
+        // (... (thing other ...))
+        // and we are trying to parse "thing" alone
+        if (x.type == List)
+        {
+            cell exp;
+            for (cell::iter e = x.list.begin(); e != x.list.end(); ++e)
+                exp.list.push_back(eval(*e, env));
+            return exp;
+        }
+        return cell(Exception, "Not a function");
+    }
 }
 
 ///////////////////////////////////////////////////// parse, read and user interaction
@@ -183,7 +227,7 @@ std::list<std::string> tokenize(const std::string& str)
             std::smatch m;
             if (std::regex_search(s, m, r))
             {
-                if (!contains_only(m[0], ' '))
+                if (!contains_only(m[0], ' ') && std::string(m[0]).substr(0, 1) != ";")
                     tokens.push_back(m[0]);
                 s = std::regex_replace(s, r, "", std::regex_constants::format_first_only);
                 ok = true;
@@ -282,6 +326,7 @@ int tests()
     TEST("(quote (testing 1 (2.0) -3.14e159))", "(testing 1 (2.0) -3.14e159)");
     TEST("(quote \"hello  world\")", "\"hello  world\"");
     TEST("(const constante 5)", "5");
+    TEST("(quote ()) ; quote ()", "()");
     TEST("(def array (list 4 5 6 7 8))", "(4 5 6 7 8)");
     TEST("(def floating 5.5)", "5.5");
     TEST("(#2 array)", "6");
@@ -340,10 +385,11 @@ int tests()
     TEST("(#hello dico)", "1");
     TEST("(keys dico)", "(\"hello\" \"other\")");
     TEST("(values dico)", "(1 (4 5 6))");
-    /*TEST("(def facul (lambda (a (b 2) (c 1)) (+ a b c)))", "<Lambda>");
-    TEST("(facul 1)", "4");
-    TEST("(facul 1 _ 2)", "5");
-    TEST("(facul 1 3)", "5");*/
+    TEST("(def range (lambda (a b) (if (= a b) (quote ()) (cons a (range (+ a 1) b)))))", "<Lambda>");
+    TEST("(range 0 10)", "(0 1 2 3 4 5 6 7 8 9)");
+    TEST("(cond ((< 1 0) false) (nil true))", "true");
+    TEST("(cond ((= 1 0) false))", "nil");
+    TEST("(cond ((= 0 1) 0) ((= 1 1) 1) ((= 2 2) 2))", "1");
 
     std::cout
         << "total tests " << g_test_count

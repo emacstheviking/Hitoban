@@ -5,23 +5,26 @@ namespace htb
 
 cell proc_add(const cells& c)
 {
+    RAISE_IF(c.size() < 2, "'add' needs at least two arguments")
     long n = to_long(c[0].val);
     for (cellit i = c.begin()+1; i != c.end(); ++i)
+    {
+        HANDLE_EXCEPTION((*i))
+        RAISE_IF(i->type != Number, "Not a number : " << i->val)
         n += to_long(i->val);
+    }
 
     return cell(Number, str(n));
 }
 
 cell proc_sub(const cells& c)
 {
+    RAISE_IF(c.size() < 2, "'sub' needs at least two arguments")
     long n = to_long(c[0].val);
     for (cellit i = c.begin()+1; i != c.end(); ++i)
     {
-        if (i->type != Number)
-        {
-            std::stringstream ss; ss << "Not a number : " << i->val << std::endl;
-            return cell(Exception, ss.str());
-        }
+        HANDLE_EXCEPTION((*i))
+        RAISE_IF(i->type != Number, "Not a number : " << i->val)
         n -= to_long(i->val);
     }
 
@@ -30,14 +33,12 @@ cell proc_sub(const cells& c)
 
 cell proc_mul(const cells& c)
 {
+    RAISE_IF(c.size() < 2, "'mul' needs at least two arguments")
     long n(1);
     for (cellit i = c.begin(); i != c.end(); ++i)
     {
-        if (i->type != Number)
-        {
-            std::stringstream ss; ss << "Not a number : " << i->val << std::endl;
-            return cell(Exception, ss.str());
-        }
+        HANDLE_EXCEPTION((*i))
+        RAISE_IF(i->type != Number, "Not a number : " << i->val)
         n *= to_long(i->val);
     }
 
@@ -46,14 +47,12 @@ cell proc_mul(const cells& c)
 
 cell proc_div(const cells& c)
 {
+    RAISE_IF(c.size() < 2, "'div' needs at least two arguments")
     long n = to_long(c[0].val);
     for (cellit i = c.begin()+1; i != c.end(); ++i)
     {
-        if (i->type != Number)
-        {
-            std::stringstream ss; ss << "Not a number : " << i->val << std::endl;
-            return cell(Exception, ss.str());
-        }
+        HANDLE_EXCEPTION((*i))
+        RAISE_IF(i->type != Number, "Not a number : " << i->val)
         n /= to_long(i->val);
     }
 
@@ -62,14 +61,12 @@ cell proc_div(const cells& c)
 
 cell proc_greater(const cells& c)
 {
+    RAISE_IF(c.size() < 2, "'gt' needs at least two arguments")
     long n = to_long(c[0].val);
     for (cellit i = c.begin()+1; i != c.end(); ++i)
     {
-        if (i->type != Number)
-        {
-            std::stringstream ss; ss << "Not a number : " << i->val << std::endl;
-            return cell(Exception, ss.str());
-        }
+        HANDLE_EXCEPTION((*i))
+        RAISE_IF(i->type != Number, "Not a number : " << i->val)
         if (n <= to_long(i->val))
             return false_sym;
     }
@@ -78,14 +75,12 @@ cell proc_greater(const cells& c)
 
 cell proc_less(const cells& c)
 {
+    RAISE_IF(c.size() < 2, "'lt' needs at least two arguments")
     long n = to_long(c[0].val);
     for (cellit i = c.begin()+1; i != c.end(); ++i)
     {
-        if (i->type != Number)
-        {
-            std::stringstream ss; ss << "Not a number : " << i->val << std::endl;
-            return cell(Exception, ss.str());
-        }
+        HANDLE_EXCEPTION((*i))
+        RAISE_IF(i->type != Number, "Not a number : " << i->val)
         if (n >= to_long(i->val))
             return false_sym;
     }
@@ -94,14 +89,12 @@ cell proc_less(const cells& c)
 
 cell proc_less_equal(const cells& c)
 {
+    RAISE_IF(c.size() < 2, "'le' needs at least two arguments")
     long n = to_long(c[0].val);
     for (cellit i = c.begin()+1; i != c.end(); ++i)
     {
-        if (i->type != Number)
-        {
-            std::stringstream ss; ss << "Not a number : " << i->val << std::endl;
-            return cell(Exception, ss.str());
-        }
+        HANDLE_EXCEPTION((*i))
+        RAISE_IF(i->type != Number, "Not a number : " << i->val)
         if (n > to_long(i->val))
             return false_sym;
     }
@@ -110,40 +103,70 @@ cell proc_less_equal(const cells& c)
 
 cell proc_eq(const cells& c)
 {
+    RAISE_IF(c.size() < 2, "'eq' needs at least two arguments")
+    long n = to_long(c[0].val);
     for (cellit i = c.begin()+1; i != c.end(); ++i)
     {
-        if (i->type != Number)
-        {
-            std::stringstream ss; ss << "Not a number : " << i->val << std::endl;
-            return cell(Exception, ss.str());
-        }
-        if (c[0].val != i->val)
+        HANDLE_EXCEPTION((*i))
+        RAISE_IF(i->type != Number, "Not a number : " << i->val)
+        long b = to_long(i->val);
+        if (n < b || n > b)
             return false_sym;
     }
     return true_sym;
 }
 
+cell proc_cond(const cells& c)
+{
+    RAISE_IF(c.size() < 1, "'cond' need at least one argument")
+    cell result(Symbol);
+
+    for (cellit i = c.begin()+1; i != c.end(); ++i)
+    {
+        HANDLE_EXCEPTION((*i))
+        if (i->list[0].val == nil.val)
+        {
+            COPY((*i).list[1], result)
+            return result;
+        }
+        if (i->list[0].val == true_sym.val)
+        {
+            COPY((*i).list[1], result)
+            return result;
+        }
+    }
+
+    return nil;
+}
+
 cell proc_length(const cells& c)
 {
+    RAISE_IF(c.size() != 1, "'length' needs only one argument")
+    HANDLE_EXCEPTION(c[0])
+    if (c[0].type == String)
+        return cell(Number, str(c[0].val.size() - 2));
     return cell(Number, str(c[0].list.size()));
 }
 
 cell proc_nullp(const cells& c)
 {
+    RAISE_IF(c.size() != 1, "'null?' needs only one argument")
+    HANDLE_EXCEPTION(c[0])
     return c[0].list.empty() ? true_sym : false_sym;
 }
 
 cell proc_car(const cells& c)
 {
-    if (!c[0].list.empty())
-        return c[0].list[0];
-
-    std::stringstream ss; ss << "List empty" << std::endl;
-    return cell(Exception, ss.str());
+    RAISE_IF(c.size() != 1, "'car' needs only one argument")
+    RAISE_IF(c[0].list.empty(), "List empty")
+    HANDLE_EXCEPTION(c[0])
+    return c[0].list[0];
 }
 
 cell proc_cdr(const cells& c)
 {
+    RAISE_IF(c.size() != 1, "'cdr' needs only one argument")
+    HANDLE_EXCEPTION(c[0])
     if (c[0].list.size() < 2)
         return nil;
 
@@ -155,32 +178,30 @@ cell proc_cdr(const cells& c)
 
 cell proc_append(const cells& c)
 {
-    if (c.size() < 2)
-    {
-        std::stringstream ss; ss << "Missing argument(s) for append" << std::endl;
-        return cell(Exception, ss.str());
-    }
-
+    RAISE_IF(c.size() < 2, "'append' needs at least two arguments")
     cell result(List);
+    HANDLE_EXCEPTION(c[0])
     result.list = c[0].list;
     for (cellit i = c[1].list.begin(); i != c[1].list.end(); ++i)
+    {
+        HANDLE_EXCEPTION((*i))
         result.list.push_back(*i);
+    }
 
     return result;
 }
 
 cell proc_cons(const cells& c)
 {
-    if (c.size() < 2)
-    {
-        std::stringstream ss; ss << "Missing argument(s) for cons" << std::endl;
-        return cell(Exception, ss.str());
-    }
-
+    RAISE_IF(c.size() < 2, "'cons' needs at least two arguments")
     cell result(List);
+    HANDLE_EXCEPTION(c[0])
     result.list.push_back(c[0]);
     for (cellit i = c[1].list.begin(); i != c[1].list.end(); ++i)
+    {
+        HANDLE_EXCEPTION((*i))
         result.list.push_back(*i);
+    }
 
     return result;
 }
@@ -195,12 +216,9 @@ cell proc_list(const cells& c)
 
 cell proc_nth(const cells& c)
 {
-    if (c.size() < 2)
-    {
-        std::stringstream ss; ss << "Missing argument(s) for nth" << std::endl;
-        return cell(Exception, ss.str());
-    }
-
+    RAISE_IF(c.size() != 2, "'nth' needs only two arguments")
+    HANDLE_EXCEPTION(c[0])
+    HANDLE_EXCEPTION(c[1])
     if (c[1].type == List)
     {
         long n = to_long(c[0].val);
@@ -214,22 +232,15 @@ cell proc_nth(const cells& c)
     else if (c[1].type == Dict)
     {
         cell tmp = c[1];
-        if (c[0].type != String)
-        {
-            std::stringstream ss; ss << "A key for a dict should always be a string, not of type " << convert_htbtype(c[0].type) << std::endl;
-            return cell(Exception, ss.str());
-        }
+        RAISE_IF(c[0].type != String, "Keys in dict are of type string, not of type " << convert_htbtype(c[0].type))
         const cell temp = tmp.get_in(c[0].val.substr(1, c[0].val.size() - 2));
 
         COPY(temp, result)
 
         return result;
     }
-    else
-    {
-        std::stringstream ss; ss << "The object should be a list or a dict, not of type " << convert_htbtype(c[1].type) << std::endl;
-        return cell(Exception, ss.str());
-    }
+    // we should not be there, so raise if true because before we must have returned immediately
+    RAISE_IF(true, "The object should be of type list or dict, not of type " << convert_htbtype(c[1].type))
 }
 
 cell proc_dict(const cells& c)
@@ -238,29 +249,20 @@ cell proc_dict(const cells& c)
 
     for (unsigned int i = 0; i < c.size(); ++i)
     {
+        HANDLE_EXCEPTION(c[i])
         COPY(c[i], temp)
 
-        if (temp.type != List)
+        RAISE_IF(temp.type != List, "Arguments of 'dict' should be of type list, not of type " << convert_htbtype(temp.type))
+        HANDLE_EXCEPTION(temp.list[0])
+        RAISE_IF(temp.list[0].type != String, "Keys for 'dict' should only be of type string, not of type " << convert_htbtype(temp.list[0].type))
+        std::string key(temp.list[0].val);
+        if (temp.list.size() > 2)  // we have more than 2 elements, not normal
         {
-            std::stringstream ss; ss << "Arguments of dict should be lists, not " << convert_htbtype(temp.type) << std::endl;
+            std::stringstream ss; ss << "Lists to define (key value) in dict should not be of size " << temp.list.size() << std::endl;
             return cell(Exception, ss.str());
         }
-        else if (temp.list[0].type != String)
-        {
-            std::stringstream ss; ss << "Keys in dict should only be strings, not " << convert_htbtype(temp.type) << std::endl;
-            return cell(Exception, ss.str());
-        }
-        else
-        {
-            std::string key(temp.list[0].val);
-            if (temp.list.size() > 2)  // we have more than 2 elements, not normal
-            {
-                std::stringstream ss; ss << "Lists to define (key value) in dict should not be of size " << temp.list.size() << std::endl;
-                return cell(Exception, ss.str());
-            }
-            COPY(temp.list[1], v)
-            result.dict[key.substr(1, key.size() - 2)] = v;
-        }
+        COPY(temp.list[1], v)
+        result.dict[key.substr(1, key.size() - 2)] = v;
     }
 
     return result;
@@ -268,16 +270,9 @@ cell proc_dict(const cells& c)
 
 cell proc_keys(const cells& c)
 {
-    if (c.size() != 1)
-    {
-        std::stringstream ss; ss << "'keys' take only one parameter : a dict" << std::endl;
-        return cell(Exception, ss.str());
-    }
-    if (c[0].type != Dict)
-    {
-        std::stringstream ss; ss << "'keys' argument should be a dict, not a " << convert_htbtype(c[0].type) << std::endl;
-        return cell(Exception, ss.str());
-    }
+    RAISE_IF(c.size() != 1, "'keys' needs only one parameter : an object of type dict")
+    HANDLE_EXCEPTION(c[0])
+    RAISE_IF(c[0].type != Dict, "'keys' argument's should be of type dict, not of type " << convert_htbtype(c[0].type))
     cell result(List);
 
     for (auto kv: c[0].dict)
@@ -293,16 +288,9 @@ cell proc_keys(const cells& c)
 
 cell proc_values(const cells& c)
 {
-    if (c.size() != 1)
-    {
-        std::stringstream ss; ss << "'values' take only one parameter : a dict" << std::endl;
-        return cell(Exception, ss.str());
-    }
-    if (c[0].type != Dict)
-    {
-        std::stringstream ss; ss << "'values' argument should be a dict, not a " << convert_htbtype(c[0].type) << std::endl;
-        return cell(Exception, ss.str());
-    }
+    RAISE_IF(c.size() != 1, "'values' needs only one argument : an object of type dict")
+    HANDLE_EXCEPTION(c[0])
+    RAISE_IF(c[0].type != Dict, "'values' argument's should be of type dict, not of type " << convert_htbtype(c[0].type))
     cell result(List);
 
     for (auto kv: c[0].dict)
@@ -337,6 +325,7 @@ std::map<std::string, cell> get_builtin()
     builtin["<"] = cell(&proc_less);
     builtin["<="] = cell(&proc_less_equal);
     builtin["="] = cell(&proc_eq);
+    builtin["cond"] = cell(&proc_cond);
     /* dictionary */
     builtin["dict"] = cell(&proc_dict);
     builtin["keys"] = cell(&proc_keys);

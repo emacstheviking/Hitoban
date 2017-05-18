@@ -12,6 +12,14 @@
             dest.dict = base.dict; \
         else \
             dest.val = base.val;
+#define HANDLE_EXCEPTION(c) if (c.type == Exception) { \
+        std::stringstream ss; ss << c.val << std::endl; \
+        return cell(Exception, ss.str()); \
+    }
+#define RAISE_IF(cd, msg) if (cd) { \
+        std::stringstream ss; ss << msg << std::endl; \
+        return cell(Exception, ss.str()); \
+    }
 
 namespace htb
 {
@@ -27,6 +35,7 @@ cell proc_greater(const cells& c);
 cell proc_less(const cells& c);
 cell proc_less_equal(const cells& c);
 cell proc_eq(const cells& c);
+cell proc_cond(const cells& c);
 
 cell proc_nullp(const cells& c);
 cell proc_length(const cells& c);
