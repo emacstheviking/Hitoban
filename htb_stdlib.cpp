@@ -233,7 +233,7 @@ cell proc_nth(const cells& c)
     {
         cell tmp = c[1];
         RAISE_IF(c[0].type != String, "Keys in dict are of type string, not of type " << convert_htbtype(c[0].type))
-        const cell temp = tmp.get_in(c[0].val.substr(1, c[0].val.size() - 2));
+        const cell temp = tmp.get_in(c[0].val);
 
         COPY(temp, result)
 
@@ -262,7 +262,7 @@ cell proc_dict(const cells& c)
             return cell(Exception, ss.str());
         }
         COPY(temp.list[1], v)
-        result.dict[key.substr(1, key.size() - 2)] = v;
+        result.dict[key] = v;
     }
 
     return result;
@@ -278,7 +278,7 @@ cell proc_keys(const cells& c)
     for (auto kv: c[0].dict)
     {
         cell k(String);
-        k.val = "\"" + kv.first + "\"";
+        k.val = kv.first;
 
         result.list.push_back(k);
     }

@@ -1,0 +1,4 @@
+(def hell "hell")
+(def a (cond ((= 5 10) 20)))
+(quote ())
+(def c "c")

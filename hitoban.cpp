@@ -59,11 +59,7 @@ cell eval(cell x, environment* env)
         if (x.list[0].val.substr(0, 1) == "#")  // (#key hashmap)
         {
             std::string key = x.list[0].val.substr(1);
-            if (key.empty())
-            {
-                std::stringstream ss; ss << x.list[0].val << " is not a valid key (length must be > 0)" << std::endl;
-                return cell(Exception, ss.str());
-            }
+            RAISE_IF(key.empty(), x.list[0].val << " is not a valid key (length must be > 0)")
             cell c(eval(x.list[1], env));
             if (c.type == Dict)
                 return c.get_in(key);
@@ -82,10 +78,8 @@ cell eval(cell x, environment* env)
         if (x.list[0].val == "set!")        // (set! var exp)
         {
             cell c = env->find(x.list[1].val)[x.list[1].val];
-            if (c.const_expr != true)
-                return env->find(x.list[1].val)[x.list[1].val] = eval(x.list[2], env);
-            std::stringstream ss; ss << x.list[0].val << " is a const expr, can not set its value to something else" << std::endl;
-            return cell(Exception, ss.str());
+            RAISE_IF(c.const_expr, x.list[1].val << " is a const expr, can not set its value to something else")
+            return env->find(x.list[1].val)[x.list[1].val] = eval(x.list[2], env);
         }
         if (x.list[0].val == "def")      // (def var exp)
             return (*env)[x.list[1].val] = eval(x.list[2], env);
@@ -112,25 +106,29 @@ cell eval(cell x, environment* env)
         }
         if (x.list[0].val == "require") // (require exp); exp as a list or a dict
         {
-            if (x.list.size() != 2)
-            {
-                std::stringstream ss; ss << "require' takes only 1 argument, not " << x.list.size() << std::endl;
-                return cell(Exception, ss.str());
-            }
+            RAISE_IF(x.list.size() != 2, "require' takes only 1 argument, not " << x.list.size())
             environment sub = environment(env);
             cell c = eval(x.list[1], env);
             if (c.type == List)
             {
                 for (cellit i = c.list.begin(); i != c.list.end(); i++)
                 {
-                    // result.list.push_back(*i);
+                    HANDLE_EXCEPTION((*i))
+                    RAISE_IF(i->type != String, "'require' needs strings, not " << convert_htbtype(i->type))
+                    LOAD_FILE(i->val)
+                    RAISE_IF(content == FILE_NOT_FOUND, "Can not find the required file '" << i->val << "'")
+                    // process file here
                 }
             }
             else if (c.type == Dict)
             {
                 for (auto kv: c.dict)
                 {
-                    //
+                    HANDLE_EXCEPTION(kv.second)
+                    RAISE_IF(kv.second.type != String, "'require' needs strings, not " << convert_htbtype(kv.second.type))
+                    LOAD_FILE(kv.second.val)
+                    RAISE_IF(content == FILE_NOT_FOUND, "Can not find the required file '" << kv.second.val << "'")
+                    // process file here
                 }
             }
             else
@@ -227,7 +225,8 @@ std::list<std::string> tokenize(const std::string& str)
             std::smatch m;
             if (std::regex_search(s, m, r))
             {
-                if (!contains_only(m[0], ' ') && std::string(m[0]).substr(0, 1) != ";")
+                std::string m0(m[0]);
+                if (!contains_only(m[0], ' ') && m0.substr(0, 1) != ";")
                     tokens.push_back(m[0]);
                 s = std::regex_replace(s, r, "", std::regex_constants::format_first_only);
                 ok = true;
@@ -250,7 +249,7 @@ cell atom(const std::string& token)
     if (isdig(token[0]) || (token[0] == '-' && isdig(token[1])))
         return cell(Number, token);
     if (token.substr(0, 1) == "\"" || token.substr(0, 1) == "'")
-        return cell(String, token);
+        return cell(String, token.substr(1, token.size() - 2));
     return cell(Symbol, token);
 }
 
@@ -295,9 +294,11 @@ std::string to_string(const cell& exp)
     else if (exp.type == Proc)
         return "<Proc>";
     else if (exp.type == Exception)
-        return (strict) ? ("<Exception> " + exp.val) : "<Exception>";
+        return "<Exception> " + exp.val;
     else if (exp.type == Dict)
         return "<Dict>";
+    else if (exp.type == String)
+        return "\"" + exp.val + "\"";
     return exp.val;
 }
 
@@ -331,7 +332,7 @@ int tests()
     TEST("(def floating 5.5)", "5.5");
     TEST("(#2 array)", "6");
     TEST("(nth 2 array)", "6");
-    TEST("(set! constante 4)", "<Exception>");
+    TEST("(set! constante 4)", "<Exception> constante is a const expr, can not set its value to something else");
     TEST("(+ 2 2)", "4");
     TEST("(+ (* 2 100) (* 1 10))", "210");
     TEST("(if (> 6 5) (+ 1 1) (+ 2 2))", "2");
@@ -416,14 +417,14 @@ int start_repl()
 
 int main(int argc, char *argv[])
 {
-    if (argc < 2)
+    if (argc < 2)  // we just started the program as a normal one, launch the read-eval-print-loop
         start_repl();
     else if (argc >= 2)
     {
         int c = 1;
         std::string input = argv[c];
 
-        if (input == "-h")
+        if (input == "-h")  // help
         {
             std::cout << "Help message" << std::endl
                             << "Usage: " << argv[0] << " [option] ... [file | tests] [args...]" << std::endl
@@ -437,19 +438,19 @@ int main(int argc, char *argv[])
                             ;
             return EXITSUCCESS;
         }
-        if (input == "-w")
+        if (input == "-w")  // strict mode
         {
             htb::set_strict(true);
 
             if (argc >= c + 2) input = argv[++c];
             else start_repl(); // we do not have other arguments, start a repl
         }
-        if (input == "-v")
+        if (input == "-v")  // version
         {
             std::cout << "Hitoban " << htb::VER_FULLVERSION_STRING << std::endl;
             return EXITSUCCESS;
         }
-        if (input == "tests")
+        if (input == "tests")  // running the tests
             return htb::tests();
 
         // if we are here, we have a filename passed as an argument
@@ -460,6 +461,7 @@ int main(int argc, char *argv[])
             htb::environment global_env;
             htb::add_globals(global_env);
 
+            // checking for arguments
             if (argc >= c + 2)
             {
                 // we have arguments for the program, let's put the in a const variable named ARGS
@@ -475,10 +477,12 @@ int main(int argc, char *argv[])
                 htb::run_string(args, &global_env);
             }
 
-            std::cout << htb::to_string(htb::run_string(content, &global_env)) << std::endl;
+            // running the code
+            htb::run_string(content, &global_env);
         }
         else
         {
+            // we can not find the file, just exit
             std::cout << argv[0] << ": can not open file '" << input << "'" << std::endl;
             return EXITFAILURE;
         }
@@ -486,16 +490,3 @@ int main(int argc, char *argv[])
 
     return EXITSUCCESS;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

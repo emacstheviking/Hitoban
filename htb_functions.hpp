@@ -3,6 +3,15 @@
 #include "htb_includes.hpp"
 #include "htb_types.hpp"
 
+#define FILE_NOT_FOUND std::string("<file not found>")
+#define LOAD_FILE(name) std::string content = ""; \
+    if (check_if_file_exists(name)) { \
+        content = read_file(name); \
+    } /*else if (check_if_file_exists(STDLIB + "/" + name)) {}*/ \
+    else { \
+        content = FILE_NOT_FOUND; \
+    }
+
 namespace htb
 {
 

@@ -16,17 +16,17 @@ namespace htb{
 	//Standard Version Type
 	static const long VER_MAJOR  = 1;
 	static const long VER_MINOR  = 0;
-	static const long VER_BUILD  = 13;
-	static const long VER_REVISION  = 75;
+	static const long VER_BUILD  = 14;
+	static const long VER_REVISION  = 85;
 	
 	//Miscellaneous Version Types
-	static const long VER_BUILDS_COUNT  = 166;
-	#define VER_RC_FILEVERSION 1,0,13,75
-	#define VER_RC_FILEVERSION_STRING "1, 0, 13, 75\0"
-	static const char VER_FULLVERSION_STRING [] = "1.0.13.75";
+	static const long VER_BUILDS_COUNT  = 198;
+	#define VER_RC_FILEVERSION 1,0,14,85
+	#define VER_RC_FILEVERSION_STRING "1, 0, 14, 85\0"
+	static const char VER_FULLVERSION_STRING [] = "1.0.14.85";
 	
 	//These values are to keep track of your versioning state, don't modify them.
-	static const long VER_BUILD_HISTORY  = 13;
+	static const long VER_BUILD_HISTORY  = 14;
 	
 
 }
