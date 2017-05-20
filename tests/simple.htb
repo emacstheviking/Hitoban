@@ -1,4 +1,4 @@
-(begin 
+(namespace "truc" 
     (def hello "hello")
-    (nth 1 ARGS)
-    (#0 ARGS))
+    (def bid hello)
+    (def c 6))

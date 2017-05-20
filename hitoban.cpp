@@ -5,6 +5,12 @@
 */
 #include "hitoban.hpp"
 
+#define READ_FILE(name, env) HANDLE_EXCEPTION(name) \
+        RAISE_IF(name.type != String, "'require' needs strings, not " << convert_htbtype(name.type)) \
+        LOAD_FILE(name.val) \
+        RAISE_IF(content == FILE_NOT_FOUND, "Can not find the required file '" << name.val << "'") \
+        run_string(content, &env);
+
 namespace htb
 {
 
@@ -19,12 +25,24 @@ const std::vector<std::regex> regexs = {
     std::regex("^;.*")                                            // comments
 };
 
+cell proc_print(const cells& c)
+{
+    for (cellit i = c.begin(); i != c.end(); ++i)
+    {
+        HANDLE_EXCEPTION((*i))
+        std::cout << to_string(*i, true) << " ";
+    }
+    std::cout << std::endl;
+    return nil;
+}
+
 // define the bare minimum set of primitives necessary to pass the unit tests
 void add_globals(environment& env)
 {
     env["nil"] = nil;
     env["false"] = false_sym;
     env["true"] = true_sym;
+    env["print"] = cell(&proc_print);
 
     for(const auto& v : get_builtin())
         env[v.first] = v.second;
@@ -100,9 +118,34 @@ cell eval(cell x, environment* env)
         }
         if (x.list[0].val == "begin")   // (begin exp*)
         {
-            for (size_t i = 1; i < x.list.size() - 1; ++i)
+            for (unsigned int i = 1; i < x.list.size() - 1; ++i)
                 eval(x.list[i], env);
             return eval(x.list[x.list.size() - 1], env);
+        }
+        if (x.list[0].val == "ns")  // (ns "name" ...)
+        {
+            RAISE_IF(x.list.size() < 2, "'ns' needs at least one argument 'name' (string)")
+            HANDLE_EXCEPTION(x.list[1])
+            environment* sub = env->get_namespace(x.list[1].val);
+
+            if (x.list.size() > 2)
+                for (unsigned int i = 2; i < x.list.size(); ++i)
+                    eval(x.list[i], sub);
+
+            return nil;
+        }
+        if (x.list[0].val == "i-ns")  // (i-ns "name" ...)
+        {
+            RAISE_IF(x.list.size() < 2, "'i-ns' needs at least one argument 'name' (string)")
+            HANDLE_EXCEPTION(x.list[1])
+            // we set is_ins to true
+            environment* sub = env->get_namespace(x.list[1].val, true);
+
+            if (x.list.size() > 2)
+                for (unsigned int i = 2; i < x.list.size(); ++i)
+                    eval(x.list[i], sub);
+
+            return nil;
         }
         if (x.list[0].val == "require") // (require exp); exp as a list or a dict
         {
@@ -113,22 +156,14 @@ cell eval(cell x, environment* env)
             {
                 for (cellit i = c.list.begin(); i != c.list.end(); i++)
                 {
-                    HANDLE_EXCEPTION((*i))
-                    RAISE_IF(i->type != String, "'require' needs strings, not " << convert_htbtype(i->type))
-                    LOAD_FILE(i->val)
-                    RAISE_IF(content == FILE_NOT_FOUND, "Can not find the required file '" << i->val << "'")
-                    // process file here
+                    READ_FILE((*i), sub)
                 }
             }
             else if (c.type == Dict)
             {
                 for (auto kv: c.dict)
                 {
-                    HANDLE_EXCEPTION(kv.second)
-                    RAISE_IF(kv.second.type != String, "'require' needs strings, not " << convert_htbtype(kv.second.type))
-                    LOAD_FILE(kv.second.val)
-                    RAISE_IF(content == FILE_NOT_FOUND, "Can not find the required file '" << kv.second.val << "'")
-                    // process file here
+                    READ_FILE(kv.second, sub)
                 }
             }
             else
@@ -161,20 +196,17 @@ cell eval(cell x, environment* env)
     }
     else if (proc.type == Proc)
         return proc.proc(exps);
-    else
+    // we have something like
+    // (... (thing other ...))
+    // and we are trying to parse "thing" alone
+    if (x.type == List)
     {
-        // we have something like
-        // (... (thing other ...))
-        // and we are trying to parse "thing" alone
-        if (x.type == List)
-        {
-            cell exp;
-            for (cell::iter e = x.list.begin(); e != x.list.end(); ++e)
-                exp.list.push_back(eval(*e, env));
-            return exp;
-        }
-        return cell(Exception, "Not a function");
+        cell exp;
+        for (cell::iter e = x.list.begin(); e != x.list.end(); ++e)
+            exp.list.push_back(eval(*e, env));
+        return exp;
     }
+    return cell(Exception, "Not a function");
 }
 
 ///////////////////////////////////////////////////// parse, read and user interaction
@@ -278,7 +310,7 @@ cell read(const std::string& s)
 }
 
 // convert given cell to a Hitoban-readable string
-std::string to_string(const cell& exp)
+std::string to_string(const cell& exp, bool from_htb)
 {
     if (exp.type == List)
     {
@@ -295,10 +327,14 @@ std::string to_string(const cell& exp)
         return "<Proc>";
     else if (exp.type == Exception)
         return "<Exception> " + exp.val;
-    else if (exp.type == Dict)
+    else if (exp.type == Dict && !from_htb)
         return "<Dict>";
-    else if (exp.type == String)
+    else if (exp.type == Dict && from_htb)
+        return "{}";
+    else if (exp.type == String && !from_htb)
         return "\"" + exp.val + "\"";
+    else if (exp.type == String && from_htb)
+        return exp.val;
     return exp.val;
 }
 
@@ -324,6 +360,8 @@ int tests()
 {
     environment global_env;
     add_globals(global_env);
+    TEST("(+ 1 2 3 4 5 6 7 8 9)", "45");
+    TEST("(print \"hello\" \"world\")", "nil");
     TEST("(quote (testing 1 (2.0) -3.14e159))", "(testing 1 (2.0) -3.14e159)");
     TEST("(quote \"hello  world\")", "\"hello  world\"");
     TEST("(const constante 5)", "5");
@@ -391,6 +429,11 @@ int tests()
     TEST("(cond ((< 1 0) false) (nil true))", "true");
     TEST("(cond ((= 1 0) false))", "nil");
     TEST("(cond ((= 0 1) 0) ((= 1 1) 1) ((= 2 2) 2))", "1");
+    TEST("(require (list \"tests/simple.htb\"))", "nil");
+    TEST("(ns \"\truc\" (print hello bid c))", "nil");
+    TEST("(ns \"test\" (def ns_test_a 5))", "nil");
+    TEST("(print ns_test_a)", "<Exception> Unbound symbol 'ns_test_a'");
+    TEST("(ns \"test\" (print ns_test_a))", "nil");
 
     std::cout
         << "total tests " << g_test_count

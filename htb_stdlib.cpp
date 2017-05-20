@@ -144,7 +144,7 @@ cell proc_length(const cells& c)
     RAISE_IF(c.size() != 1, "'length' needs only one argument")
     HANDLE_EXCEPTION(c[0])
     if (c[0].type == String)
-        return cell(Number, str(c[0].val.size() - 2));
+        return cell(Number, str(c[0].val.size()));
     return cell(Number, str(c[0].list.size()));
 }
 
@@ -302,10 +302,20 @@ cell proc_values(const cells& c)
     return result;
 }
 
+cell proc_prin1(const cells& c)
+{
+    RAISE_IF(c.size() != 1, "'prin1' needs only one argument")
+    HANDLE_EXCEPTION(c[0])
+    RAISE_IF(c[0].type != String, "'prin1' argument's should be of type string, not of type " << convert_htbtype(c[0].type))
+    std::cout << c[0].val;
+    return nil;
+}
+
 ///////////////////////////////////////////////////// built-in functions
 std::map<std::string, cell> get_builtin()
 {
     std::map<std::string, cell> builtin;
+
     /* list */
     builtin["append"] = cell(&proc_append);
     builtin["car"] = cell(&proc_car);
@@ -330,6 +340,8 @@ std::map<std::string, cell> get_builtin()
     builtin["dict"] = cell(&proc_dict);
     builtin["keys"] = cell(&proc_keys);
     builtin["values"] = cell(&proc_values);
+    /* IO */
+    builtin["prin1"] = cell(&proc_prin1);
 
     return builtin;
 }

@@ -23,7 +23,7 @@ std::list<std::string> tokenize(const std::string& str);
 cell atom(const std::string& token);
 cell read_from(std::list<std::string>& tokens);
 cell read(const std::string& s);
-std::string to_string(const cell& exp);
+std::string to_string(const cell& exp, bool from_htb=false);
 cell run_string(const std::string& code, environment* env);
 void repl(const std::string& prompt, environment* env);
 

@@ -94,6 +94,7 @@ const cell false_sym(Symbol, "false");
 const cell true_sym(Symbol, "true"); // anything that isn't false_sym is true
 const cell nil(Symbol, "nil");
 
+/* Experimental
 inline bool compare_cells(const cell& a, const cell& b)
 {
     if (a.list.empty() && b.list.empty() && a.dict.empty() && b.dict.empty())
@@ -127,18 +128,21 @@ inline bool compare_cells(const cell& a, const cell& b)
 
     return false;
 }
+*/
 
 ///////////////////////////////////////////////////// environment
 
 // a dictionary that (a) associates symbols with cells, and
 // (b) can chain to an "outer" dictionary
 struct environment {
-    environment(environment* outer=0) :
+    environment(environment* outer=0, bool isolated=false) :
         outer_(outer)
+        , isolated_(isolated)
     {}
 
     environment(const cells& parms, const cells& args, environment* outer) :
         outer_(outer)
+        , isolated_(false)
     {
         cellit a = args.begin();
         for (cellit p = parms.begin(); p != parms.end(); ++p)
@@ -158,7 +162,7 @@ struct environment {
         if (outer_)
             return outer_->find(var); // attempt to find the symbol in some "outer" env
 
-        std::stringstream ss; ss << "Unbound symbol '" << var << "'" << std::endl;
+        std::stringstream ss; ss << "Unbound symbol '" << var << "'";
         errors[var] = cell(Exception, ss.str());
         return errors;
     }
@@ -169,10 +173,37 @@ struct environment {
         return env_[var];
     }
 
+    // return true is the environment is isolated
+    bool is_isolated()
+    {
+        return isolated_;
+    }
+
+    // get a namespace or create one
+    environment* get_namespace(const std::string& name, bool is_ins=false)
+    {
+        if (namespaces.find(name) == namespaces.end())
+        {
+            if (!is_ins)
+                namespaces[name] = new environment(this);
+            else
+                namespaces[name] = new environment(0, true);
+        }
+        /*std::string msg("You are trying to create a");
+        if (is_ins) msg += "n isolated";
+        else msg += " non-isolated";
+        msg += " namespace that already exists in the opposite state";
+        RAISE_IF(namespaces[name]->is_isolated() != is_ins, msg)*/
+
+        return namespaces[name];
+    }
+
 private:
     map env_; // inner symbol->cell mapping
     map errors;
+    std::map<std::string, environment*> namespaces;
     environment* outer_; // next adjacent outer env, or 0 if there are no further environments
+    bool isolated_;
 };
 
 } // namespace htb

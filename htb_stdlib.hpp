@@ -5,22 +5,6 @@
 #include "htb_functions.hpp"
 #include "htb_cell.hpp"
 
-#define COPY(base, dest) cell dest(base.type); \
-        if (dest.type == List) \
-            dest.list = base.list; \
-        else if (dest.type == Dict) \
-            dest.dict = base.dict; \
-        else \
-            dest.val = base.val;
-#define HANDLE_EXCEPTION(c) if (c.type == Exception) { \
-        std::stringstream ss; ss << c.val << std::endl; \
-        return cell(Exception, ss.str()); \
-    }
-#define RAISE_IF(cd, msg) if (cd) { \
-        std::stringstream ss; ss << msg << std::endl; \
-        return cell(Exception, ss.str()); \
-    }
-
 namespace htb
 {
 
@@ -49,6 +33,8 @@ cell proc_nth(const cells& c);
 cell proc_dict(const cells& c);
 cell proc_keys(const cells& c);
 cell proc_values(const cells& c);
+
+cell proc_prin1(const cells& c);
 
 std::map<std::string, cell> get_builtin();
 
