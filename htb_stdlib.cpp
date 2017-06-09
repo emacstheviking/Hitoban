@@ -256,11 +256,7 @@ cell proc_dict(const cells& c)
         HANDLE_EXCEPTION(temp.list[0])
         RAISE_IF(temp.list[0].type != String, "Keys for 'dict' should only be of type string, not of type " << convert_htbtype(temp.list[0].type))
         std::string key(temp.list[0].val);
-        if (temp.list.size() > 2)  // we have more than 2 elements, not normal
-        {
-            std::stringstream ss; ss << "Lists to define (key value) in dict should not be of size " << temp.list.size() << std::endl;
-            return cell(Exception, ss.str());
-        }
+        RAISE_IF(temp.list.size() > 2,"Lists to define (key value) in dict should not be of size " << temp.list.size())  // we have more than 2 elements, not normal
         COPY(temp.list[1], v)
         result.dict[key] = v;
     }

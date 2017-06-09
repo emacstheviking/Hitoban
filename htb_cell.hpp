@@ -46,44 +46,16 @@ struct cell
 
     cell get_in(const std::string& key)
     {
-        if (type == Dict)
-        {
-            if (!dict.empty())
-            {
-                if (dict.find(key) != dict.end())
-                    return dict[key];
-                std::stringstream ss; ss << "Can not find the key " << key << " in the dict" << std::endl;
-                return cell(Exception, ss.str());
-            }
-            else
-            {
-                std::stringstream ss; ss << "Can not access an element with the key " << key << " because the dict is empty" << std::endl;
-                return cell(Exception, ss.str());
-            }
-        }
-        else
-        {
-            std::stringstream ss; ss << "Can not access a sub element because the object is not a dict" << std::endl;
-            return cell(Exception, ss.str());
-        }
+        RAISE_IF(type != Dict, "Can not access a sub element because the object is not a dict")
+        RAISE_IF(dict.empty(), "Can not access an element with the key " << key << " because the dict is empty")
+        RAISE_IF(dict.find(key) == dict.end(), "Can not find the key " << key << " in the dict")
+        return dict[key];
     }
     cell get_in(long n)
     {
-        if (type == List)
-        {
-            if (n < long(list.size()))
-                return list[n];
-            else
-            {
-                std::stringstream ss; ss << "Can not find the  " << n << "th element in the list" << std::endl;
-                return cell(Exception, ss.str());
-            }
-        }
-        else
-        {
-            std::stringstream ss; ss << "Can not access a sub element because the object is not a list" << std::endl;
-            return cell(Exception, ss.str());
-        }
+        RAISE_IF(type != List, "Can not access a sub element because the object is not a list")
+        RAISE_IF(n >= long(list.size()), "Can not find the " << n << "th element in the list")
+        return list[n];
     }
 };
 

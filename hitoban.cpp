@@ -17,6 +17,7 @@ namespace htb
 static bool strict = false;
 const std::vector<std::regex> regexs = {
     std::regex("^['\"][^'\"]+['\"]"),                         // strings
+    std::regex("^:"),                                               // dict key symbol
     std::regex("^[\\(\\)]"),                                      // parenthesis
     std::regex("^((\\+|-)?[[:digit:]]+)(\\.(([[:digit:]]+)?))?((e|E)((\\+|-)?)[[:digit:]]+)?"),                  // numbers
     std::regex("^[#@$':_!?\\-\\w]+"),                   // words
@@ -71,6 +72,20 @@ cell eval(cell x, environment* env)
         return x;
     if (x.list.empty())
         return nil;
+    if (x.list[0].val == ":")  // dict key symbol
+    {
+        RAISE_IF(x.list.size() < 1, "':' symbolize the beginning of a dict key, the length should be of 2, not of " << x.list.size())
+
+        cell exps;
+        exps.type = List;
+
+        //x.list[1].val = "\"" + x.list[1].val + "\"";
+        x.list[1].type = String;
+        exps.list.push_back(x.list[1]);
+        for (cell::iter exp = x.list.begin() + 2; exp != x.list.end(); ++exp)
+            exps.list.push_back(eval(*exp, env));
+        return exps;
+    }
 
     if (x.list[0].type == Symbol)
     {
@@ -434,6 +449,9 @@ int tests()
     TEST("(ns \"test\" (def ns_test_a 5))", "nil");
     TEST("(print ns_test_a)", "<Exception> Unbound symbol 'ns_test_a'");
     TEST("(ns \"test\" (print ns_test_a))", "nil");
+    TEST("(def testdct (dict (:name \"truc\") (:machin (list 1 2 3 4))))", "<Dict>");
+    TEST("(nth \"name\" testdct)", "\"truc\"");
+    TEST("(nth \"machin\" testdct)", "(1 2 3 4)");
 
     std::cout
         << "total tests " << g_test_count
