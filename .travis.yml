@@ -9,4 +9,7 @@ install:
 - sudo apt-get install -qq g++-4.8
 - export CXX="g++-4.8"
 
+before_script:
+ - chmod +x ./build.sh
+
 script: "bash -c ./build.sh"
