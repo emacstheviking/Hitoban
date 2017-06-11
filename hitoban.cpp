@@ -367,7 +367,18 @@ void repl(const std::string& prompt, environment* env)
         std::cout << prompt;
         std::string line;
         std::getline(std::cin, line);
-        std::cout << to_string(run_string(line, env)) << std::endl;
+        if (line == "help")
+        {
+            std::cout << "Type \"quit\" to quit the repl"
+                            << std::endl;
+        }
+        else if (line == "quit")
+        {
+            std::cout << "Bye !" << std::endl;
+            break;
+        }
+        else
+            std::cout << to_string(run_string(line, env)) << std::endl;
     }
 }
 
@@ -467,6 +478,8 @@ int start_repl()
     std::cout << "Hitoban " << htb::VER_FULLVERSION_STRING
                     << " (last build on " << htb::VER_DATE << "/" << htb::VER_MONTH << "/" << htb::VER_YEAR << ")"
                     << " [status " << htb::VER_STATUS << "]"
+                    << std::endl
+                    << "Type \"help\" for more information."
                     << std::endl;
 
     htb::environment global_env;
