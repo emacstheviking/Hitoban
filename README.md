@@ -60,7 +60,9 @@ $ g++ -o bin\hitoban obj\hitoban.o obj\htb_functions.o obj\htb_stdlib.o
 
 (Using the flags `-fexpensive-optimizations -O3` can reduce drastically the size of the executable file produced)
 
-You can also use the makefile : `cd [Hitoban sources directory] && make && make test`
+You can also use the makefile : `cd [Hitoban sources directory] && make`
+
+To launch the tests will building : `make tests`
 
 # What's new
 
