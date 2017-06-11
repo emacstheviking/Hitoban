@@ -9,7 +9,7 @@ Hitoban is an interpreted programming language, in C++ (which respects the C++11
 For the small history, the language is named like this because a "millipede" is called "Hitoban" in Japanese, 
 and all those brackets make a Hitoban code looks like a millipede. :)
 
-We choose a lisp-like syntax because it was really easy to tokenize and to parse, and so to execute. The main purpose of this language is to offer something reliable, with 
+We chosed a lisp-like syntax because it was really easy to tokenize and to parse, and so to execute. The main purpose of this language is to offer something reliable, with 
 the less bugs possible (goal is 0), and very easy to use in any C++ project. So you understand why the grammar is so basic and can seems to be redundant. :wink:
 
 # Goals
