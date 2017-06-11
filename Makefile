@@ -1,6 +1,6 @@
 
 all:
-    $(CXX) -pedantic -std=c++11 -Wall -Wextra -g hitoban.cpp       -o hitoban.o
+	$(CXX) -pthread -std=c++11 -Wall -Wextra hitoban.cpp -o hitoban
 
 test:
-    ./hitoban || exit 1
+	./hitoban || exit 1
