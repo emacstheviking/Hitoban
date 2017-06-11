@@ -1,6 +1,6 @@
 # Hitoban
 
-// need to setup build environment (travis or alike)
+[![Build Status](https://travis-ci.org/Loodoor/Hitoban.svg?branch=master)](https://travis-ci.org/Loodoor/Hitoban)
 
 # Introduction
 
