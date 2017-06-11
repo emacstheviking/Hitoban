@@ -4,7 +4,7 @@
 
 # Introduction
 
-Hitoban is an interpreted programming language, in C++ (which respects the C++14 norm). It is a lisp-like (no please don't quit us now !) :smiley:
+Hitoban is an interpreted programming language, in C++ (which respects the C++11 norm). It is a lisp-like (no please don't quit us now !) :smiley:
 
 For the small history, the language is named like this because a "millipede" is called "Hitoban" in Japanese, 
 and all those brackets make a Hitoban code looks like a millipede. :)
@@ -17,7 +17,7 @@ the less bugs possible (goal is 0), and very easy to use in any C++ project. So 
 * no bugs
 * 0 dependencies
 * do not stop on exception, or at least try
-* no warning when compiling with `g++ -Wall -std=c++14 -pedantic -Wextra -g`
+* no warning when compiling with `g++ -Wall -std=c++11 -pedantic -Wextra -g`
 
 # Using Hitoban
 
@@ -52,10 +52,10 @@ Type "help" for more information.
 You just need to compile the code as follow, no dependencies are needed.
 
 ```
-$ g++ -Wall -std=c++14 -pedantic -Wextra -g  -c hitoban.cpp       -o obj\hitoban.o
-$ g++ -Wall -std=c++14 -pedantic -Wextra -g  -c htb_functions.cpp -o obj\htb_functions.o
-$ g++ -Wall -std=c++14 -pedantic -Wextra -g  -c htb_stdlib.cpp    -o obj\htb_stdlib.o
-$ g++  -o bin\hitoban obj\hitoban.o obj\htb_functions.o obj\htb_stdlib.o  
+$ g++ -Wall -std=c++11 -pedantic -Wextra -g  -c hitoban.cpp       -o obj\hitoban.o
+$ g++ -Wall -std=c++11 -pedantic -Wextra -g  -c htb_functions.cpp -o obj\htb_functions.o
+$ g++ -Wall -std=c++11 -pedantic -Wextra -g  -c htb_stdlib.cpp    -o obj\htb_stdlib.o
+$ g++ -o bin\hitoban obj\hitoban.o obj\htb_functions.o obj\htb_stdlib.o  
 ```
 
 (Using the flags `-fexpensive-optimizations -O3` can reduce drastically the size of the executable file produced)

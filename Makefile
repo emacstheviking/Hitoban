@@ -12,7 +12,7 @@ LD = g++
 WINDRES = windres
 
 INC = 
-CFLAGS = -pedantic -Wextra -Wall -std=c++14
+CFLAGS = -pedantic -Wextra -Wall -std=c++11
 RESINC = 
 LIBDIR = 
 LIB = 
