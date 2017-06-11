@@ -275,7 +275,7 @@ std::list<std::string> tokenize(const std::string& str)
                 std::string m0(m[0]);
                 if (!contains_only(m[0], ' ') && m0.substr(0, 1) != ";")
                     tokens.push_back(m[0]);
-                s = std::regex_replace(s, r, "", std::regex_constants::format_first_only);
+                s = std::regex_replace(s, r, std::string(""), std::regex_constants::format_first_only);
                 ok = true;
                 break;
             }
