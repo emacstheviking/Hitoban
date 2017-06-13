@@ -9,7 +9,7 @@
         RAISE_IF(name.type != String, "'require' needs strings, not " << convert_htbtype(name.type)) \
         LOAD_FILE(name.val) \
         RAISE_IF(content == FILE_NOT_FOUND, "Can not find the required file '" << name.val << "'") \
-        run_string(content, &env);
+        run_string(content, env);
 
 namespace htb
 {
@@ -162,32 +162,35 @@ cell eval(cell x, environment* env)
 
             return nil;
         }
-        if (x.list[0].val == "require") // (require exp); exp as a list or a dict
+        if (x.list[0].val == "require") // (require exp); exp as a list, a dict or a string
         {
             RAISE_IF(x.list.size() != 2, "require' takes only 1 argument, not " << x.list.size())
-            environment sub = environment(env);
             cell c = eval(x.list[1], env);
+
             if (c.type == List)
             {
                 for (cellit i = c.list.begin(); i != c.list.end(); i++)
                 {
-                    READ_FILE((*i), sub)
+                    READ_FILE((*i), env)
                 }
+            }
+            else if (c.type == String)
+            {
+                READ_FILE(c, env)
             }
             else if (c.type == Dict)
             {
                 for (auto kv: c.dict)
                 {
+                    environment* sub = env->get_namespace(kv.first);
                     READ_FILE(kv.second, sub)
                 }
             }
             else
             {
-                std::stringstream ss; ss << "require' takes a dict or a list as an argument, not a " << convert_htbtype(c.type) << std::endl;
+                std::stringstream ss; ss << "require' takes a dict, a list or a single string as an argument, not a " << convert_htbtype(c.type) << std::endl;
                 return cell(Exception, ss.str());
             }
-
-            // we do not have to return anything, we are just loading files in sub-environment(s)
             return nil;
         }
     }
@@ -386,25 +389,32 @@ int tests()
 {
     environment global_env;
     add_globals(global_env);
+    // basics tests
     TEST("(+ 1 2 3 4 5 6 7 8 9)", "45");
     TEST("(print \"hello\" \"world\")", "nil");
     TEST("(quote (testing 1 (2.0) -3.14e159))", "(testing 1 (2.0) -3.14e159)");
     TEST("(quote \"hello  world\")", "\"hello  world\"");
     TEST("(const constante 5)", "5");
     TEST("(quote ()) ; quote ()", "()");
+    TEST("(set! constante 4)", "<Exception> constante is a const expr, can not set its value to something else");
+    TEST("(+ 2 2)", "4");
+    TEST("(+ (* 2 100) (* 1 10))", "210");
+    // arrays tests
     TEST("(def array (list 4 5 6 7 8))", "(4 5 6 7 8)");
     TEST("(def floating 5.5)", "5.5");
     TEST("(#2 array)", "6");
     TEST("(nth 2 array)", "6");
-    TEST("(set! constante 4)", "<Exception> constante is a const expr, can not set its value to something else");
-    TEST("(+ 2 2)", "4");
-    TEST("(+ (* 2 100) (* 1 10))", "210");
+    // conditions tests
     TEST("(if (> 6 5) (+ 1 1) (+ 2 2))", "2");
     TEST("(if (< 6 5) (+ 1 1) (+ 2 2))", "4");
     TEST("(def x 3)", "3");
     TEST("x", "3");
     TEST("(+ x x)", "6");
     TEST("(begin (def x 1) (set! x (+ x 1)) (+ x 1))", "3");
+    TEST("(cond ((< 1 0) false) (nil true))", "true");
+    TEST("(cond ((= 1 0) false))", "nil");
+    TEST("(cond ((= 0 1) 0) ((= 1 1) 1) ((= 2 2) 2))", "1");
+    // lambdas tests
     TEST("((lambda (x) (+ x x)) 5)", "10");
     TEST("(def twice (lambda (x) (* 2 x)))", "<Lambda>");
     TEST("(twice 5)", "10");
@@ -434,6 +444,9 @@ int tests()
     TEST("(riff-shuffle (list 1 2 3 4 5 6 7 8))", "(1 5 2 6 3 7 4 8)");
     TEST("((repeat riff-shuffle) (list 1 2 3 4 5 6 7 8))",  "(1 3 5 7 2 4 6 8)");
     TEST("(riff-shuffle (riff-shuffle (riff-shuffle (list 1 2 3 4 5 6 7 8))))", "(1 2 3 4 5 6 7 8)");
+    TEST("(def range (lambda (a b) (if (= a b) (quote ()) (cons a (range (+ a 1) b)))))", "<Lambda>");
+    TEST("(range 0 10)", "(0 1 2 3 4 5 6 7 8 9)");
+    // clojures tests
     TEST("(def set-hidden 0)", "0");
     TEST("(def get-hidden 0)", "0");
     TEST("((lambda ()"
@@ -444,25 +457,24 @@ int tests()
     TEST("(get-hidden)", "0");
     TEST("(set-hidden 1234)", "1234");
     TEST("(get-hidden)", "1234");
+    // dicts tests
     TEST("(def dico (dict (list \"hello\" 1) (list \"other\" (list 4 5 6))))", "<Dict>");
     TEST("(nth \"hello\" dico)", "1");
     TEST("(#other dico)", "(4 5 6)");
     TEST("(#hello dico)", "1");
     TEST("(keys dico)", "(\"hello\" \"other\")");
     TEST("(values dico)", "(1 (4 5 6))");
-    TEST("(def range (lambda (a b) (if (= a b) (quote ()) (cons a (range (+ a 1) b)))))", "<Lambda>");
-    TEST("(range 0 10)", "(0 1 2 3 4 5 6 7 8 9)");
-    TEST("(cond ((< 1 0) false) (nil true))", "true");
-    TEST("(cond ((= 1 0) false))", "nil");
-    TEST("(cond ((= 0 1) 0) ((= 1 1) 1) ((= 2 2) 2))", "1");
+    TEST("(def testdct (dict (:name \"truc\") (:machin (list 1 2 3 4))))", "<Dict>");
+    TEST("(nth \"name\" testdct)", "\"truc\"");
+    TEST("(nth \"machin\" testdct)", "(1 2 3 4)");
+    // require tests (+ ns tests)
     TEST("(require (list \"tests/simple.htb\"))", "nil");
     TEST("(ns \"\truc\" (print hello bid c))", "nil");
     TEST("(ns \"test\" (def ns_test_a 5))", "nil");
     TEST("(print ns_test_a)", "<Exception> Unbound symbol 'ns_test_a'");
     TEST("(ns \"test\" (print ns_test_a))", "nil");
-    TEST("(def testdct (dict (:name \"truc\") (:machin (list 1 2 3 4))))", "<Dict>");
-    TEST("(nth \"name\" testdct)", "\"truc\"");
-    TEST("(nth \"machin\" testdct)", "(1 2 3 4)");
+    TEST("(require (dict (:sub \"tests/simple.htb\")))", "nil");
+    TEST("(ns \"sub\" (print bid c))", "nil");
 
     std::cout
         << "total tests " << g_test_count
