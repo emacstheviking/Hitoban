@@ -356,6 +356,20 @@ cell proc_prin1(const cells& c)
     return nil;
 }
 
+cell proc_md5(const cells& c)
+{
+    RAISE_IF(c.size() != 1, "'md5' needs only one argument")
+    HANDLE_EXCEPTION(c[0])
+    RAISE_IF(c[0].type != String, "'md5' argument's should of type string, not of type " << convert_htbtype(c[0].type))
+
+    md5::md5_t context;
+    context.process(c[0].val.c_str(), c[0].val.size());
+    context.finish();
+    char out[MD5_STRING_SIZE];
+    context.get_string(out);
+    return cell(String, std::string(out));
+}
+
 ///////////////////////////////////////////////////// built-in functions
 std::map<std::string, cell> get_builtin()
 {
@@ -390,6 +404,8 @@ std::map<std::string, cell> get_builtin()
     builtin["values"] = cell(&proc_values);
     /* IO */
     builtin["prin1"] = cell(&proc_prin1);
+    /* crypt */
+    builtin["md5"] = cell(&proc_md5);
 
     return builtin;
 }

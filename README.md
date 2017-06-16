@@ -53,6 +53,20 @@ Type "help" for more information.
 > 
 ```
 
+## Using Hitoban in a C++ project
+
+Download the [project](https://github.com/Loodoor/Hitoban/archive/master.zip) and extract it in a directory called `hitoban` (for example) in your project.
+
+All you need to do is to include `FOLDER WHERE YOU DOWNLOADED HTB/hitoban.hpp`, and then to execute Hitoban code, follow these steps :
+
+```cpp
+// we strongly advise you to create only one Hitoban environment and to keep it
+htb::environment env = htb::init_environment();
+htb::cell value = htb::run_string("CODE HERE", env);
+// if you want to print the value the Hitoban interpreter returned you :
+std::cout << htb::to_string(value) << htb::endl;
+```
+
 # Building
 
 ## Building the Hitoban interpreter

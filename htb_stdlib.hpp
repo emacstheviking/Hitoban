@@ -5,6 +5,8 @@
 #include "htb_functions.hpp"
 #include "htb_cell.hpp"
 
+#include "ext_libs/md5/md5.h"
+
 namespace htb
 {
 
@@ -38,6 +40,8 @@ cell proc_keys(const cells& c);
 cell proc_values(const cells& c);
 
 cell proc_prin1(const cells& c);
+
+cell proc_md5(const cells& c);
 
 std::map<std::string, cell> get_builtin();
 

@@ -507,6 +507,8 @@ int tests()
     TEST("(ns \"test\" (print ns_test_a))", "nil");
     TEST("(require (dict (:sub \"tests/simple.htb\")))", "nil");
     TEST("(ns \"sub\" (print bid c))", "nil");
+    // other functions included by default
+    TEST("(md5 \"hello\")", "\"5d41402abc4b2a76b9719d911017c592\"");
 
     std::cout
         << "total tests " << g_test_count

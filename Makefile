@@ -44,7 +44,7 @@ OBJ_DEBUG = $(OBJDIR_DEBUG)/hitoban.o $(OBJDIR_DEBUG)/htb_functions.o $(OBJDIR_D
 
 OBJ_RELEASE = $(OBJDIR_RELEASE)/hitoban.o $(OBJDIR_RELEASE)/htb_functions.o $(OBJDIR_RELEASE)/htb_stdlib.o
 
-all: debug release tests
+all: debug release
 
 clean: clean_debug clean_release
 
@@ -103,4 +103,3 @@ clean_release:
 tests:
 	./bin/Debug/hitoban tests || exit 1
 	./bin/Release/hitoban tests || exit 1
-
