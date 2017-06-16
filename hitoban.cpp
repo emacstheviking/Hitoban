@@ -473,13 +473,10 @@ int tests()
     TEST("(cdf4)", "2");
     TEST("(cdf4)", "1");
     TEST("(cdf4)", "0");
-    TEST("(def count-to "
-         "(lambda (x y) "
-            "(lambda () "
-                "(if (= x y) nil (set! x (+ x 1))))))", "<Lambda>");
+    TEST("(def count-to (lambda (x y) (lambda () (begin (const _x x) (if (= x y) nil (if (= x _x) (begin (set! x (+ x 1)) (- x 1)) (set! x (+ x 1))))))))", "<Lambda>");
     TEST("(def truuc (count-to 5 7))", "<Lambda>");
+    TEST("(truuc)", "5");
     TEST("(truuc)", "6");
-    TEST("(truuc)", "7");
     TEST("(truuc)", "nil");
     // closures tests
     TEST("(def set-hidden 0)", "0");
