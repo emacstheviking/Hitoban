@@ -370,6 +370,15 @@ cell proc_md5(const cells& c)
     return cell(String, std::string(out));
 }
 
+cell proc_system(const cells& c)
+{
+    RAISE_IF(c.size() != 1, "'system' needs only one argument")
+    HANDLE_EXCEPTION(c[0])
+    RAISE_IF(c[0].type != String, "'system' argument's should of type string, not of type " << convert_htbtype(c[0].type))
+
+    return cell(Number, str(system(c[0].val.c_str())));
+}
+
 ///////////////////////////////////////////////////// built-in functions
 std::map<std::string, cell> get_builtin()
 {
@@ -404,8 +413,9 @@ std::map<std::string, cell> get_builtin()
     builtin["values"] = cell(&proc_values);
     /* IO */
     builtin["prin1"] = cell(&proc_prin1);
-    /* crypt */
+    /* other */
     builtin["md5"] = cell(&proc_md5);
+    builtin["system"] = cell(&proc_system);
 
     return builtin;
 }

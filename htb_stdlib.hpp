@@ -42,6 +42,7 @@ cell proc_values(const cells& c);
 cell proc_prin1(const cells& c);
 
 cell proc_md5(const cells& c);
+cell proc_system(const cells& c);
 
 std::map<std::string, cell> get_builtin();
 

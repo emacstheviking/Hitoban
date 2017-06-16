@@ -1,4 +1,4 @@
-(ns "truc" 
+(ns "truc"
     (def hello "hello")
     (def bid hello)
     (def c 6))

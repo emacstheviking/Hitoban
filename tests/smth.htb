@@ -1,0 +1,4 @@
+(begin
+    (def hello2 "hello")
+    (def bid2 hello2)
+    (def c2 6))

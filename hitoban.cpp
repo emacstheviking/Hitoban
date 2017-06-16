@@ -505,10 +505,11 @@ int tests()
     TEST("(ns \"test\" (def ns_test_a 5))", "nil");
     TEST("(print ns_test_a)", "<Exception> Unbound symbol 'ns_test_a'");
     TEST("(ns \"test\" (print ns_test_a))", "nil");
-    TEST("(require (dict (:sub \"tests/simple.htb\")))", "nil");
-    TEST("(ns \"sub\" (print bid c))", "nil");
+    TEST("(require (dict (:sub \"tests/smth.htb\")))", "nil");
+    TEST("(ns \"sub\" (print bid2 c2))", "nil");
     // other functions included by default
     TEST("(md5 \"hello\")", "\"5d41402abc4b2a76b9719d911017c592\"");
+    TEST("(system \"echo\")", "0");
 
     std::cout
         << "total tests " << g_test_count

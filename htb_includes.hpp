@@ -18,6 +18,8 @@
 
 #include <cmath>
 
+#include <stdlib.h>
+
 #define EXITSUCCESS 0x0
 #define EXITFAILURE 0x1
 
