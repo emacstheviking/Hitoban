@@ -27,9 +27,11 @@ the less bugs possible (goal is 0), and very easy to use in any C++ project. So 
 
 Arguments, which must be separated by spaces, are given to the script into a `const list` called `ARGS`.
 
-The option `-w` is used to turn Hitoban in strict mode (should stop after getting an exception) (experimental).
-
 ## Using the Hitoban shell
+
+`./hitoban -w` => turns Hitoban in strict mode (should stop after getting an exception). Raises a `std::runtime_error`
+
+`./hitoban -t` => turns Hitoban in tracking mode : it will print the type and content of each variable evaluated
 
 `./hitoban -v` => prints the version of the language
 
@@ -37,10 +39,16 @@ The option `-w` is used to turn Hitoban in strict mode (should stop after gettin
 
 `./hitoban` => start a simple *repl* (read eval print loop)
 
+Those options can be cumulated : `-t`, `-w` with `file [args...]`.
+
+Example of command using both the tracking mode and the strict mode while executing an Hitoban code in a file `file.htb`, giving `5` as an argument of the script :
+
+`./hitoban -t -w file.htb 5`
+
 Something like this will show up :
 
 ```
-Hitoban 1.0.21.122 (last build on 09/06/2017) [status Alpha]
+Hitoban 1.0.26.155 (last build on 16/06/2017) [status Alpha]
 Type "help" for more information.
 > 
 ```
@@ -62,7 +70,7 @@ $ g++ -o bin\hitoban obj\hitoban.o obj\htb_functions.o obj\htb_stdlib.o
 
 You can also use the makefile : `cd [Hitoban sources directory] && make`
 
-To launch the tests will building : `make tests`
+To launch the tests while building : `make tests`
 
 # What's new
 
@@ -83,14 +91,18 @@ Call the Hitoban interpreter with the option `tests`, as following :
 Example output :
 
 ```
+Hitoban 1.0.26.155 (last build on 16/06/2017) [status Alpha]
 hello world
+hello hello 6
 5
-total tests 64, total failures 0
+hello 6
+total tests 77, total failures 0
 ```
 
 # Proposal for enhancement
 
-If you have any idea to improve the language, please open an issue and tag it as `PFP` (Proposal For Enhancement).
+If you have any idea to improve the language, please open an issue and tag it as `PFP` (Proposal For Enhancement). We will try to review as soon as possible, and if
+your PFP is accepted (and developed by the way), it will be published under https://kyatchioru.tk/Hitoban/PFP
 
 # Copyright and license
 
