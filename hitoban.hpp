@@ -39,8 +39,8 @@ void test_equal_(const T1& value, const T2& expected_value, const char* litteral
         std::cout
             << file << "(" << line << ") : "
             << " expected " << expected_value
-            << ", got " << value
-            << ", with " << litteral_val
+            << ", got `" << value
+            << "`, with " << litteral_val
             << std::endl;
         ++g_fault_count;
     }

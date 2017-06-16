@@ -97,4 +97,10 @@ std::string read_file(const std::string& filename)
     return ss.str();
 }
 
+std::string get_filename(const std::string& path)
+{
+    std::size_t found = path.find_last_of("/\\");
+    return path.substr(found + 1);
+}
+
 } // namespace htb

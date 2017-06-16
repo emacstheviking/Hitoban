@@ -15,6 +15,7 @@ namespace htb
 {
 
 static bool strict = false;
+static bool tracking = false;
 const std::vector<std::regex> regexs = {
     std::regex("^['\"][^'\"]+['\"]"),                         // strings
     std::regex("^:"),                                               // dict key symbol
@@ -54,6 +55,11 @@ void set_strict(bool s)
     strict = s;
 }
 
+void set_tracking(bool t)
+{
+    tracking = t;
+}
+
 environment init_environment()
 {
     environment env;
@@ -66,6 +72,17 @@ environment init_environment()
 
 cell eval(cell x, environment* env)
 {
+    if (tracking)
+    {
+        std::cout << "x: " << to_string(x) << " "
+                        << "[" << ((!env->has_outer()) ? "global" : "ref on global") << "]"
+                        << std::endl;
+    }
+
+    // quitting if we got an exception
+    if (x.type == Exception && strict)
+        throw std::runtime_error(std::string("Encountered an exception will in strict mode\n") + to_string(x));
+
     if (x.type == Symbol)
         return env->find(x.val)[x.val];
     if (x.type == Number || x.type == String)
@@ -79,7 +96,6 @@ cell eval(cell x, environment* env)
         cell exps;
         exps.type = List;
 
-        //x.list[1].val = "\"" + x.list[1].val + "\"";
         x.list[1].type = String;
         exps.list.push_back(x.list[1]);
         for (cell::iter exp = x.list.begin() + 2; exp != x.list.end(); ++exp)
@@ -102,12 +118,7 @@ cell eval(cell x, environment* env)
         if (x.list[0].val == "quote")       // (quote exp)
             return x.list[1];
         if (x.list[0].val == "if")          // (if test conseq [alt])
-        {
-            std::string v(nil.val);
-            if (x.list[1].type == List)
-                v = false_sym.val;
-            return eval(eval(x.list[1], env).val == v ? (x.list.size() < 4 ? nil : x.list[3]) : x.list[2], env);
-        }
+            return eval(eval(x.list[1], env).val == false_sym.val ? (x.list.size() < 4 ? nil : x.list[3]) : x.list[2], env);
         if (x.list[0].val == "set!")        // (set! var exp)
         {
             cell c = env->find(x.list[1].val)[x.list[1].val];
@@ -155,6 +166,7 @@ cell eval(cell x, environment* env)
             HANDLE_EXCEPTION(x.list[1])
             // we set is_ins to true
             environment* sub = env->get_namespace(x.list[1].val, true);
+            add_globals(*sub);
 
             if (x.list.size() > 2)
                 for (unsigned int i = 2; i < x.list.size(); ++i)
@@ -385,10 +397,19 @@ void repl(const std::string& prompt, environment* env)
     }
 }
 
+void print_shell_headers()
+{
+    std::cout << "Hitoban " << VER_FULLVERSION_STRING
+                    << " (last build on " << VER_DATE << "/" << VER_MONTH << "/" << VER_YEAR << ")"
+                    << " [status " << VER_STATUS << "]"
+                    << std::endl;
+}
+
 int tests()
 {
     environment global_env;
     add_globals(global_env);
+    print_shell_headers();
     // basics tests
     TEST("(+ 1 2 3 4 5 6 7 8 9)", "45");
     TEST("(print \"hello\" \"world\")", "nil");
@@ -446,7 +467,21 @@ int tests()
     TEST("(riff-shuffle (riff-shuffle (riff-shuffle (list 1 2 3 4 5 6 7 8))))", "(1 2 3 4 5 6 7 8)");
     TEST("(def range (lambda (a b) (if (= a b) (quote ()) (cons a (range (+ a 1) b)))))", "<Lambda>");
     TEST("(range 0 10)", "(0 1 2 3 4 5 6 7 8 9)");
-    // clojures tests
+    TEST("(def count-down-from (lambda (n) (lambda () (set! n (- n 1)))))", "<Lambda>");
+    TEST("(def cdf4 (count-down-from 4))", "<Lambda>");
+    TEST("(cdf4)", "3");
+    TEST("(cdf4)", "2");
+    TEST("(cdf4)", "1");
+    TEST("(cdf4)", "0");
+    TEST("(def count-to "
+         "(lambda (x y) "
+            "(lambda () "
+                "(if (= x y) nil (set! x (+ x 1))))))", "<Lambda>");
+    TEST("(def truuc (count-to 5 7))", "<Lambda>");
+    TEST("(truuc)", "6");
+    TEST("(truuc)", "7");
+    TEST("(truuc)", "nil");
+    // closures tests
     TEST("(def set-hidden 0)", "0");
     TEST("(def get-hidden 0)", "0");
     TEST("((lambda ()"
@@ -487,11 +522,8 @@ int tests()
 
 int start_repl()
 {
-    std::cout << "Hitoban " << htb::VER_FULLVERSION_STRING
-                    << " (last build on " << htb::VER_DATE << "/" << htb::VER_MONTH << "/" << htb::VER_YEAR << ")"
-                    << " [status " << htb::VER_STATUS << "]"
-                    << std::endl
-                    << "Type \"help\" for more information."
+    htb::print_shell_headers();
+    std::cout << "Type \"help\" for more information."
                     << std::endl;
 
     htb::environment global_env;
@@ -516,7 +548,8 @@ int main(int argc, char *argv[])
                             << "Usage: " << argv[0] << " [option] ... [file | tests] [args...]" << std::endl
                             << "Options and arguments:" << std::endl
                             << "-h      : print this help message and exit" << std::endl
-                            << "-w     : print all the warning messages" << std::endl
+                            << "-w      : stop execution if an exception is detected" << std::endl
+                            << "-t      : print all the details of the execution" << std::endl
                             << "-v      : print the Hitoban version number and exit" << std::endl
                             << "file    : program read from script file" << std::endl
                             << "tests   : launch all the tests and print how many passed, then exit" << std::endl
@@ -529,7 +562,22 @@ int main(int argc, char *argv[])
             htb::set_strict(true);
 
             if (argc >= c + 2) input = argv[++c];
-            else start_repl(); // we do not have other arguments, start a repl
+            else
+            {
+                start_repl();  // we do not have other arguments, start a repl
+                return EXITSUCCESS;
+            }
+        }
+        if (input == "-t")  // tracking mode
+        {
+            htb::set_tracking(true);
+
+            if (argc >= c + 2) input = argv[++c];
+            else
+            {
+                start_repl();  // we do not have other arguments, start a repl
+                return EXITSUCCESS;
+            }
         }
         if (input == "-v")  // version
         {

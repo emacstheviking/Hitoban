@@ -16,6 +16,8 @@
 
 #include <fstream>
 
+#include <cmath>
+
 #define EXITSUCCESS 0x0
 #define EXITFAILURE 0x1
 

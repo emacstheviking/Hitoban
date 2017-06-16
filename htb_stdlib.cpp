@@ -6,6 +6,7 @@ namespace htb
 cell proc_add(const cells& c)
 {
     RAISE_IF(c.size() < 2, "'add' needs at least two arguments")
+    HANDLE_EXCEPTION(c[0])
     long n = to_long(c[0].val);
     for (cellit i = c.begin()+1; i != c.end(); ++i)
     {
@@ -19,14 +20,20 @@ cell proc_add(const cells& c)
 
 cell proc_sub(const cells& c)
 {
-    RAISE_IF(c.size() < 2, "'sub' needs at least two arguments")
+    RAISE_IF(c.size() < 1, "'sub' needs at least one argument")
+    HANDLE_EXCEPTION(c[0])
     long n = to_long(c[0].val);
-    for (cellit i = c.begin()+1; i != c.end(); ++i)
+    if (c.size() > 1)
     {
-        HANDLE_EXCEPTION((*i))
-        RAISE_IF(i->type != Number, "Not a number : " << i->val)
-        n -= to_long(i->val);
+        for (cellit i = c.begin()+1; i != c.end(); ++i)
+        {
+            HANDLE_EXCEPTION((*i))
+            RAISE_IF(i->type != Number, "Not a number : " << i->val)
+            n -= to_long(i->val);
+        }
     }
+    else
+        n = -n;
 
     return cell(Number, str(n));
 }
@@ -48,6 +55,7 @@ cell proc_mul(const cells& c)
 cell proc_div(const cells& c)
 {
     RAISE_IF(c.size() < 2, "'div' needs at least two arguments")
+    HANDLE_EXCEPTION(c[0])
     long n = to_long(c[0].val);
     for (cellit i = c.begin()+1; i != c.end(); ++i)
     {
@@ -59,9 +67,42 @@ cell proc_div(const cells& c)
     return cell(Number, str(n));
 }
 
+cell proc_and(const cells& c)
+{
+    RAISE_IF(c.size() < 2, "'and' needs at least two arguments")
+    for (unsigned int i = 0; i < c.size(); ++i)
+    {
+        HANDLE_EXCEPTION(c[i])
+        if (c[i].type == Symbol && c[i].val == false_sym.val)
+            return false_sym;
+    }
+    return true_sym;
+}
+
+cell proc_or(const cells& c)
+{
+    RAISE_IF(c.size() < 2, "'or' needs at least two arguments")
+    for (unsigned int i = 0; i < c.size(); ++i)
+    {
+        HANDLE_EXCEPTION(c[i])
+        if (c[i].type == Symbol && c[i].val == true_sym.val)
+            return true_sym;
+    }
+    return false_sym;
+}
+
+cell proc_pow(const cells& c)
+{
+    RAISE_IF(c.size() != 2, "'pow' needs only two arguments")
+    HANDLE_EXCEPTION(c[0])
+    HANDLE_EXCEPTION(c[1])
+    return cell(Number, str(std::pow(to_long(c[0].val), to_long(c[1].val))));
+}
+
 cell proc_greater(const cells& c)
 {
     RAISE_IF(c.size() < 2, "'gt' needs at least two arguments")
+    HANDLE_EXCEPTION(c[0])
     long n = to_long(c[0].val);
     for (cellit i = c.begin()+1; i != c.end(); ++i)
     {
@@ -76,6 +117,7 @@ cell proc_greater(const cells& c)
 cell proc_less(const cells& c)
 {
     RAISE_IF(c.size() < 2, "'lt' needs at least two arguments")
+    HANDLE_EXCEPTION(c[0])
     long n = to_long(c[0].val);
     for (cellit i = c.begin()+1; i != c.end(); ++i)
     {
@@ -90,6 +132,7 @@ cell proc_less(const cells& c)
 cell proc_less_equal(const cells& c)
 {
     RAISE_IF(c.size() < 2, "'le' needs at least two arguments")
+    HANDLE_EXCEPTION(c[0])
     long n = to_long(c[0].val);
     for (cellit i = c.begin()+1; i != c.end(); ++i)
     {
@@ -104,6 +147,7 @@ cell proc_less_equal(const cells& c)
 cell proc_eq(const cells& c)
 {
     RAISE_IF(c.size() < 2, "'eq' needs at least two arguments")
+    HANDLE_EXCEPTION(c[0])
     long n = to_long(c[0].val);
     for (cellit i = c.begin()+1; i != c.end(); ++i)
     {
@@ -179,8 +223,8 @@ cell proc_cdr(const cells& c)
 cell proc_append(const cells& c)
 {
     RAISE_IF(c.size() < 2, "'append' needs at least two arguments")
-    cell result(List);
     HANDLE_EXCEPTION(c[0])
+    cell result(List);
     result.list = c[0].list;
     for (cellit i = c[1].list.begin(); i != c[1].list.end(); ++i)
     {
@@ -194,8 +238,8 @@ cell proc_append(const cells& c)
 cell proc_cons(const cells& c)
 {
     RAISE_IF(c.size() < 2, "'cons' needs at least two arguments")
-    cell result(List);
     HANDLE_EXCEPTION(c[0])
+    cell result(List);
     result.list.push_back(c[0]);
     for (cellit i = c[1].list.begin(); i != c[1].list.end(); ++i)
     {
@@ -209,6 +253,11 @@ cell proc_cons(const cells& c)
 cell proc_list(const cells& c)
 {
     cell result(List);
+    for (unsigned int i = 0; i < c.size(); ++i)
+    {
+        HANDLE_EXCEPTION(c[i])
+    }
+
     result.list = c;
 
     return result;
@@ -326,6 +375,9 @@ std::map<std::string, cell> get_builtin()
     builtin["-"] = cell(&proc_sub);
     builtin["*"] = cell(&proc_mul);
     builtin["/"] = cell(&proc_div);
+    builtin["&"] = cell(&proc_and);
+    builtin["|"] = cell(&proc_or);
+    builtin["^"] = cell(&proc_pow);
     /* conditionals operators */
     builtin[">"]  = cell(&proc_greater);
     builtin["<"] = cell(&proc_less);

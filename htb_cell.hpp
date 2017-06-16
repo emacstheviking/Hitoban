@@ -66,42 +66,6 @@ const cell false_sym(Symbol, "false");
 const cell true_sym(Symbol, "true"); // anything that isn't false_sym is true
 const cell nil(Symbol, "nil");
 
-/* Experimental
-inline bool compare_cells(const cell& a, const cell& b)
-{
-    if (a.list.empty() && b.list.empty() && a.dict.empty() && b.dict.empty())
-        return (a.type == b.type && a.val == b.val && a.proc == b.proc && a.const_expr == b.const_expr);
-    else if (!a.list.empty() && !b.list.empty() && a.dict.empty() && b.dict.empty())
-    {
-        bool r = (a.type == b.type && a.val == b.val && a.proc == b.proc && a.const_expr == b.const_expr && a.list.size() == b.list.size());
-        if (!r)
-            return false;
-        for (unsigned int i=0; i < a.list.size(); ++i)
-        {
-            if (!compare_cells(a.list[i], b.list[i]))
-                return false;
-        }
-        return true;
-    }
-    else if (a.list.empty() && b.list.empty() && !a.dict.empty() && !b.dict.empty())
-    {
-        bool r = (a.type == b.type && a.val == b.val && a.proc == b.proc && a.const_expr == b.const_expr && a.dict.size() == b.dict.size());
-        if (!r)
-            return false;
-        for (auto kv: a.dict)
-        {
-            if (b.dict.find(kv.first) == a.dict.end())
-                return false;
-            if (!compare_cells(kv.second, b.dict.find(kv.first)->second))
-                return false;
-        }
-        return true;
-    }
-
-    return false;
-}
-*/
-
 ///////////////////////////////////////////////////// environment
 
 // a dictionary that (a) associates symbols with cells, and
@@ -145,27 +109,38 @@ struct environment {
         return env_[var];
     }
 
-    // return true is the environment is isolated
+    // return true if the environment is isolated
     bool is_isolated()
     {
         return isolated_;
     }
 
+    bool has_outer()
+    {
+        return outer_ != 0;
+    }
+
     // get a namespace or create one
     environment* get_namespace(const std::string& name, bool is_ins=false)
     {
-        if (namespaces.find(name) == namespaces.end())
+        if (outer_ == 0)
         {
-            if (!is_ins)
-                namespaces[name] = new environment(this);
-            else
-                namespaces[name] = new environment(0, true);
+            if (namespaces.find(name) == namespaces.end())
+            {
+                if (!is_ins)
+                {
+                    namespaces[name] = new environment(this);
+                }
+                else
+                {
+                    namespaces[name] = new environment(0, true);
+                }
+            }
         }
-        /*std::string msg("You are trying to create a");
-        if (is_ins) msg += "n isolated";
-        else msg += " non-isolated";
-        msg += " namespace that already exists in the opposite state";
-        RAISE_IF(namespaces[name]->is_isolated() != is_ins, msg)*/
+        else
+        {
+            outer_->get_namespace(name, is_ins);
+        }
 
         return namespaces[name];
     }

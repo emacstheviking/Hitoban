@@ -30,5 +30,6 @@ bool contains_only(const std::string& s, char t);
 // about files
 bool check_if_file_exists(const std::string& filename);
 std::string read_file(const std::string& filename);
+std::string get_filename(const std::string& path);
 
 } // namespace htb
