@@ -71,20 +71,9 @@ std::cout << htb::to_string(value) << htb::endl;
 
 ## Building the Hitoban interpreter
 
-You just need to compile the code as follow, no dependencies are needed.
+`cd [Hitoban sources directory] && make`
 
-```
-$ g++ -Wall -std=c++11 -pedantic -Wextra -g  -c hitoban.cpp       -o obj\hitoban.o
-$ g++ -Wall -std=c++11 -pedantic -Wextra -g  -c htb_functions.cpp -o obj\htb_functions.o
-$ g++ -Wall -std=c++11 -pedantic -Wextra -g  -c htb_stdlib.cpp    -o obj\htb_stdlib.o
-$ g++ -o bin\hitoban obj\hitoban.o obj\htb_functions.o obj\htb_stdlib.o  
-```
-
-(Using the flags `-fexpensive-optimizations -O3` can reduce drastically the size of the executable file produced)
-
-You can also use the makefile : `cd [Hitoban sources directory] && make`
-
-To launch the tests while building : `make tests`
+To build and launch the tests : `make tests`
 
 # What's new
 
