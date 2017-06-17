@@ -18,7 +18,7 @@ namespace rj
 {
     using namespace std;
 
-    int stoi(const std::string& s);
+    int mystoi(const std::string& s);
 
     /*!
      * class to handle printf style formating using a format string containing specifiers that

@@ -8,7 +8,7 @@
 
 namespace rj
 {
-    int stoi(const std::string& s)
+    int mystoi(const std::string& s)
     {
         std::stringstream b(s);
         int out;
@@ -120,7 +120,7 @@ namespace rj
                 if (comma != string::npos) {
                     spec.format = format.substr(1, comma);
 
-                    spec.width = stoi(temp.substr(comma + 1));
+                    spec.width = mystoi(temp.substr(comma + 1));
 
                 } else {
                     spec.format = format.substr(1, format.length() - 1);
@@ -132,14 +132,14 @@ namespace rj
                 divider = temp.find(',');
 
                 if (divider != string::npos) {
-                    spec.width = stoi(temp.substr(divider + 1));
+                    spec.width = mystoi(temp.substr(divider + 1));
 
                     temp = temp.substr(0, divider);
                 }
             }
 
 
-            spec.index = stoi(temp);
+            spec.index = mystoi(temp);
 
         } catch (...) {
             throw invalid_argument("invalid specifier format");
@@ -220,7 +220,7 @@ namespace rj
             case 'e':
                 if (!arg.format.empty()) {
                     try {
-                        int p = stoi(arg.format);
+                        int p = mystoi(arg.format);
                         out << setprecision(p);
                     } catch (...) {
                         throw invalid_argument("invalid precision format for argument");
@@ -234,7 +234,7 @@ namespace rj
             case 'f':
                 if (!arg.format.empty()) {
                     try {
-                        int p = stoi(arg.format);
+                        int p = mystoi(arg.format);
                         out << setprecision(p);
                     } catch (...) {
                         throw invalid_argument("invalid precision format for argument");
