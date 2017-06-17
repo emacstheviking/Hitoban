@@ -16,6 +16,7 @@ namespace htb
 
 void add_globals(environment& env);
 void set_strict(bool s=true);
+void set_tracking(bool t=true);
 environment init_environment();
 cell eval(cell x, environment* env);
 void raise_tokenizing_error(const std::string& str, const std::string& s);
@@ -23,13 +24,13 @@ std::list<std::string> tokenize(const std::string& str);
 cell atom(const std::string& token);
 cell read_from(std::list<std::string>& tokens);
 cell read(const std::string& s);
-std::string to_string(const cell& exp, bool from_htb=false);
 cell run_string(const std::string& code, environment* env);
 void repl(const std::string& prompt, environment* env);
+void print_shell_headers();
 
 ///////////////////////////////////////////////////// tests
-unsigned g_test_count;      // count of number of unit tests executed
-unsigned g_fault_count;     // count of number of unit tests that fail
+static unsigned g_test_count;      // count of number of unit tests executed
+static unsigned g_fault_count;     // count of number of unit tests that fail
 template <typename T1, typename T2>
 void test_equal_(const T1& value, const T2& expected_value, const char* litteral_val, const char* file, int line)
 {
@@ -45,5 +46,6 @@ void test_equal_(const T1& value, const T2& expected_value, const char* litteral
         ++g_fault_count;
     }
 }
+int tests();
 
 }

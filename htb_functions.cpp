@@ -81,6 +81,35 @@ bool contains_only(const std::string& s, char t)
     return ok;
 }
 
+// convert given cell to a Hitoban-readable string
+std::string to_string(const cell& exp, bool from_htb)
+{
+    if (exp.type == List)
+    {
+        std::string s("(");
+        for (cell::iter e = exp.list.begin(); e != exp.list.end(); ++e)
+            s += to_string(*e) + ' ';
+        if (s[s.size() - 1] == ' ')
+            s.erase(s.size() - 1);
+        return s + ')';
+    }
+    else if (exp.type == Lambda)
+        return "<Lambda>";
+    else if (exp.type == Proc)
+        return "<Proc>";
+    else if (exp.type == Exception)
+        return "<Exception> " + exp.val;
+    else if (exp.type == Dict && !from_htb)
+        return "<Dict>";
+    else if (exp.type == Dict && from_htb)
+        return "{}";
+    else if (exp.type == String && !from_htb)
+        return "\"" + exp.val + "\"";
+    else if (exp.type == String && from_htb)
+        return exp.val;
+    return exp.val;
+}
+
 bool check_if_file_exists(const std::string& filename)
 {
     std::ifstream f(filename.c_str());

@@ -38,3 +38,16 @@
         std::stringstream ss; ss << c.val; \
         return cell(Exception, ss.str()); \
     }
+#define FILE_NOT_FOUND std::string("<file not found>")
+#define LOAD_FILE(name) std::string content = ""; \
+    if (check_if_file_exists(name)) { \
+        content = read_file(name); \
+    } /*else if (check_if_file_exists(STDLIB + "/" + name)) {}*/ \
+    else { \
+        content = FILE_NOT_FOUND; \
+    }
+#define READ_FILE(name, env) HANDLE_EXCEPTION(name) \
+        RAISE_IF(name.type != String, "'require' needs strings, not " << convert_htbtype(name.type)) \
+        LOAD_FILE(name.val) \
+        RAISE_IF(content == FILE_NOT_FOUND, "Can not find the required file '" << name.val << "'") \
+        run_string(content, env);

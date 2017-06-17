@@ -347,6 +347,17 @@ cell proc_values(const cells& c)
     return result;
 }
 
+cell proc_print(const cells& c)
+{
+    for (cellit i = c.begin(); i != c.end(); ++i)
+    {
+        HANDLE_EXCEPTION((*i))
+        std::cout << to_string(*i, true) << " ";
+    }
+    std::cout << std::endl;
+    return nil;
+}
+
 cell proc_prin1(const cells& c)
 {
     RAISE_IF(c.size() != 1, "'prin1' needs only one argument")
@@ -354,20 +365,6 @@ cell proc_prin1(const cells& c)
     RAISE_IF(c[0].type != String, "'prin1' argument's should be of type string, not of type " << convert_htbtype(c[0].type))
     std::cout << c[0].val;
     return nil;
-}
-
-cell proc_md5(const cells& c)
-{
-    RAISE_IF(c.size() != 1, "'md5' needs only one argument")
-    HANDLE_EXCEPTION(c[0])
-    RAISE_IF(c[0].type != String, "'md5' argument's should of type string, not of type " << convert_htbtype(c[0].type))
-
-    md5::md5_t context;
-    context.process(c[0].val.c_str(), c[0].val.size());
-    context.finish();
-    char out[MD5_STRING_SIZE];
-    context.get_string(out);
-    return cell(String, std::string(out));
 }
 
 cell proc_system(const cells& c)
@@ -412,9 +409,9 @@ std::map<std::string, cell> get_builtin()
     builtin["keys"] = cell(&proc_keys);
     builtin["values"] = cell(&proc_values);
     /* IO */
+    builtin["print"] = cell(&proc_print);
     builtin["prin1"] = cell(&proc_prin1);
     /* other */
-    builtin["md5"] = cell(&proc_md5);
     builtin["system"] = cell(&proc_system);
 
     return builtin;
