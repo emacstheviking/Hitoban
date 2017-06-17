@@ -18,6 +18,8 @@ int tests()
     TEST("(set! constante 4)", "<Exception> constante is a const expr, can not set its value to something else");
     TEST("(+ 2 2)", "4");
     TEST("(+ (* 2 100) (* 1 10))", "210");
+    TEST("(nth 4 \"hello\")", "\"o\"");
+    TEST("(#1 \"hello\")", "\"e\"");
     // arrays tests
     TEST("(def array (list 4 5 6 7 8))", "(4 5 6 7 8)");
     TEST("(def floating 5.5)", "5.5");
@@ -116,6 +118,8 @@ int tests()
     TEST("(str-cat \"hello \" \"world\")", "\"hello world\"");
     TEST("(str-eq \"hello\" \"hello\")", "true");
     ///TEST("(str-eq \"hello\" \"Æ\"", "false");  // not yet supporting UTF-8 strings
+    TEST("(str-format \"{0} walked up {1} miles and saw {2} and {0}\" \"a bear\" 20 \"an eagle\")", "<Exception> specifier index not ordered");
+    TEST("(str-format \"{0} walked up {1} miles and saw {2}\" \"a bear\" 20 \"an eagle\")", "\"a bear walked up 20 miles and saw an eagle\"");
 
     std::cout
         << "total tests " << g_test_count

@@ -288,8 +288,14 @@ cell proc_nth(const cells& c)
 
         return result;
     }
-    // we should not be there, so raise if true because before we must return immediately
-    RAISE_IF(true, "The object should be of type list or dict, not of type " << convert_htbtype(c[1].type))
+    else if (c[1].type == String)
+    {
+        long n = to_long(c[0].val);
+        RAISE_IF(n >= long(c[1].val.size()), "'nth' can not get a character at pos " << n << " because it is outside the string")
+        return cell(String, std::string(1, c[1].val[n]));
+    }
+    // we should not be there
+    RAISE("The object should be of type list, dict or string, not of type " << convert_htbtype(c[1].type))
 }
 
 cell proc_dict(const cells& c)
@@ -439,12 +445,33 @@ cell proc_str_reverse(const cells& c)
 
 cell proc_str_format(const cells& c)
 {
-    // see http://fmtlib.net/latest/syntax.html for the syntax of the format engine
+    // see https://github.com/ryjen/format for the syntax of the format engine
     RAISE_IF(c.size() < 2, "'str-format' needs at least 2 arguments")
     HANDLE_EXCEPTION(c[0])
     RAISE_IF(c[0].type != String, "'str-format' first argument should be of type string, not of type " << convert_htbtype(c[0].type))
-    std::string msg = "";//fmt::format(c[0].val, );
-    return cell(String, msg);
+
+    try
+    {
+        rj::format f(c[0].val);
+        for (unsigned int i = 1; i < c.size(); ++i)
+        {
+            HANDLE_EXCEPTION(c[i])
+            RAISE_IF(c[i].type != String && c[i].type != Number, "'str-format' arguments' should be of type string, not of type " << convert_htbtype(c[i].type))
+            if (c[i].type == Number)
+                f.args(to_long(c[i].val));
+            else
+                f.args(c[i].val);
+        }
+        std::string msg = f;
+        return cell(String, msg);
+    }
+    catch (const std::invalid_argument& e)
+    {
+        RAISE(e.what())
+    }
+
+    // we should never be there, because we either return something in the try or in the catch
+    return nil;
 }
 
 cell proc_typeof(const cells& c)

@@ -94,8 +94,15 @@ cell eval(cell x, environment* env)
             cell c(eval(x.list[1], env));
             if (c.type == Dict)
                 return c.get_in(key);
-            else
+            else if (c.type == List)
                 return c.get_in(to_long(key));
+            else if (c.type == String)
+            {
+                long n = to_long(key);
+                RAISE_IF(n >= long(c.val.size()), "'nth' can not get a character at pos " << n << " because it is outside the string")
+                return cell(String, std::string(1, c.val[n]));
+            }
+            RAISE("The object should be of type dict, list or string to use the # pattern, not of type " << convert_htbtype(c.type))
         }
         if (x.list[0].val == "quote")       // (quote exp)
             return x.list[1];

@@ -5,8 +5,6 @@
 #include "htb_functions.hpp"
 #include "htb_cell.hpp"
 
-#include "ext_lib/fmt/format.hpp"
-
 namespace htb
 {
 

@@ -17,20 +17,18 @@
 #include <fstream>
 
 #include <cmath>
-
 #include <stdlib.h>
-
 #include <cstdio>
 
 #include <random>
+#include "ext_lib/fmt/format.hpp"
+#include <unordered_map>
 
 #define EXITSUCCESS 0x0
 #define EXITFAILURE 0x1
 
-#define RAISE_IF(cd, msg) if (cd) { \
-        std::stringstream ss; ss << msg; \
-        return cell(Exception, ss.str()); \
-    }
+#define RAISE(msg) {std::stringstream ss; ss << msg; return cell(Exception, ss.str());}
+#define RAISE_IF(cd, msg) if (cd) { RAISE(msg) }
 #define COPY(base, dest) cell dest(base.type); \
         if (dest.type == List) \
             dest.list = base.list; \
