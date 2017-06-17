@@ -288,7 +288,7 @@ cell proc_nth(const cells& c)
 
         return result;
     }
-    // we should not be there, so raise if true because before we must have returned immediately
+    // we should not be there, so raise if true because before we must return immediately
     RAISE_IF(true, "The object should be of type list or dict, not of type " << convert_htbtype(c[1].type))
 }
 
@@ -315,7 +315,7 @@ cell proc_dict(const cells& c)
 
 cell proc_keys(const cells& c)
 {
-    RAISE_IF(c.size() != 1, "'keys' needs only one parameter : an object of type dict")
+    RAISE_IF(c.size() != 1, "'keys' needs only one argument : an object of type dict")
     HANDLE_EXCEPTION(c[0])
     RAISE_IF(c[0].type != Dict, "'keys' argument's should be of type dict, not of type " << convert_htbtype(c[0].type))
     cell result(List);
@@ -367,6 +367,27 @@ cell proc_prin1(const cells& c)
     return nil;
 }
 
+cell proc_input(const cells& c)
+{
+    RAISE_IF(c.size() > 1, "'input' needs one or zero argument")
+    if (c.size() == 1)
+    {
+        HANDLE_EXCEPTION(c[0])
+        std::cout << c[0].val;
+    }
+    std::string o;
+    std::cin >> o;
+    return cell(String, o);
+}
+
+cell proc_getc(const cells& c)
+{
+    RAISE_IF(c.size() > 0, "'getc' needs no arguments")
+    char _c;
+    std::cin.get(_c);
+    return cell(String, std::string(1, _c));
+}
+
 cell proc_system(const cells& c)
 {
     RAISE_IF(c.size() != 1, "'system' needs only one argument")
@@ -374,6 +395,91 @@ cell proc_system(const cells& c)
     RAISE_IF(c[0].type != String, "'system' argument's should of type string, not of type " << convert_htbtype(c[0].type))
 
     return cell(Number, str(system(c[0].val.c_str())));
+}
+
+cell proc_str_eq(const cells& c)
+{
+    RAISE_IF(c.size() < 2, "'str-eq' needs at least two arguments")
+    RAISE_IF(c[0].type != String, "'str-eq' arguments' should be of type string, not of type " << convert_htbtype(c[0].type))
+    std::string f = c[0].val;
+    for (unsigned int i = 1; i < c.size(); ++i)
+    {
+        HANDLE_EXCEPTION(c[i])
+        RAISE_IF(c[i].type != String, "'str-eq' arguments' should be of type string, not of type " << convert_htbtype(c[i].type))
+        if (c[i].val != f)
+            return false_sym;
+    }
+    return true_sym;
+}
+
+cell proc_str_cat(const cells& c)
+{
+    RAISE_IF(c.size() < 2, "'str-cat' needs at least two arguments")
+    HANDLE_EXCEPTION(c[0])
+    RAISE_IF(c[0].type != String, "'str-cat' arguments' should be of type string, not of type " << convert_htbtype(c[0].type))
+    std::string f = c[0].val;
+    for (unsigned int i = 1; i < c.size(); ++i)
+    {
+        HANDLE_EXCEPTION(c[i])
+        RAISE_IF(c[i].type != String, "'str-cat' arguments' should be of type string, not of type " << convert_htbtype(c[i].type))
+        f += c[i].val;
+    }
+    return cell(String, f);
+}
+
+cell proc_str_reverse(const cells& c)
+{
+    RAISE_IF(c.size() != 1, "'str-reverse' needs only one argument")
+    HANDLE_EXCEPTION(c[0])
+    RAISE_IF(c[0].type != String, "'str-reverse' argument's should be of type string, not of type " << convert_htbtype(c[0].type))
+    std::string s = c[0].val;
+    std::reverse(s.begin(), s.end());
+    return cell(String, s);
+}
+
+cell proc_str_format(const cells& c)
+{
+    // see http://fmtlib.net/latest/syntax.html for the syntax of the format engine
+    RAISE_IF(c.size() < 2, "'str-format' needs at least 2 arguments")
+    HANDLE_EXCEPTION(c[0])
+    RAISE_IF(c[0].type != String, "'str-format' first argument should be of type string, not of type " << convert_htbtype(c[0].type))
+    std::string msg = "";//fmt::format(c[0].val, );
+    return cell(String, msg);
+}
+
+cell proc_typeof(const cells& c)
+{
+    RAISE_IF(c.size() != 1, "'typeof' needs only one argument")
+    return cell(String, convert_htbtype(c[0].type));
+}
+
+cell proc_random(const cells& c)
+{
+    RAISE_IF(c.size() > 2, "'random' needs between zero and two arguments")
+    long n;
+    std::mt19937 gen;
+    if (c.size() == 0)
+    {
+        std::uniform_real_distribution<> d(0, 1);
+        n = d(gen);
+    }
+    else if (c.size() == 1)
+    {
+        HANDLE_EXCEPTION(c[0])
+        RAISE_IF(c[0].type != Number, "'random' arguments' should be of type number, not of type " << convert_htbtype(c[0].type))
+        std::uniform_int_distribution<> d(0, to_long(c[0].val));
+        n = d(gen);
+    }
+    else
+    {
+        HANDLE_EXCEPTION(c[0])
+        RAISE_IF(c[0].type != Number, "'random' arguments' should be of type number, not of type " << convert_htbtype(c[0].type))
+        HANDLE_EXCEPTION(c[1])
+        RAISE_IF(c[1].type != Number, "'random' arguments' should be of type number, not of type " << convert_htbtype(c[1].type))
+        std::uniform_int_distribution<> d(to_long(c[0].val), to_long(c[1].val));
+        n = d(gen);
+    }
+    return cell(Number, str(n));
 }
 
 ///////////////////////////////////////////////////// built-in functions
@@ -411,8 +517,19 @@ std::map<std::string, cell> get_builtin()
     /* IO */
     builtin["print"] = cell(&proc_print);
     builtin["prin1"] = cell(&proc_prin1);
+    builtin["input"] = cell(&proc_input);
+    builtin["getc"] = cell(&proc_getc);
     /* other */
     builtin["system"] = cell(&proc_system);
+    /* strings */
+    builtin["str-eq"] = cell(&proc_str_eq);
+    builtin["str-cat"] = cell(&proc_str_cat);
+    builtin["str-reverse"] = cell(&proc_str_reverse);
+    builtin["str-format"] = cell(&proc_str_format);
+    /* types */
+    builtin["typeof"] = cell(&proc_typeof);
+    /* random */
+    builtin["random"] = cell(&proc_random);
 
     return builtin;
 }

@@ -5,6 +5,8 @@
 #include "htb_functions.hpp"
 #include "htb_cell.hpp"
 
+#include "ext_lib/fmt/format.hpp"
+
 namespace htb
 {
 
@@ -39,8 +41,19 @@ cell proc_values(const cells& c);
 
 cell proc_print(const cells& c);
 cell proc_prin1(const cells& c);
+cell proc_input(const cells& c);
+cell proc_getc(const cells& c);
 
 cell proc_system(const cells& c);
+
+cell proc_str_eq(const cells& c);
+cell proc_str_cat(const cells& c);
+cell proc_str_reverse(const cells& c);
+cell proc_str_format(const cells& c);
+
+cell proc_typeof(const cells& c);
+
+cell proc_random(const cells& c);
 
 std::map<std::string, cell> get_builtin();
 

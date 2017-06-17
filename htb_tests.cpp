@@ -44,8 +44,8 @@ int tests()
     TEST("((repeat (repeat twice)) 5)", "80");
     TEST("(def fact (lambda (n) (if (<= n 1) 1 (* n (fact (- n 1))))))", "<Lambda>");
     TEST("(fact 3)", "6");
-    //TEST("(fact 50)", "30414093201713378043612608166064768844377641568960512000000000000");
-    TEST("(fact 12)", "479001600"); // no bignums; this is as far as we go with 32 bits
+    ///TEST("(fact 50)", "30414093201713378043612608166064768844377641568960512000000000000");
+    TEST("(fact 12)", "479001600");  // no bignums; this is as far as we go with 32 bits
     TEST("(def abs (lambda (n) ((if (> n 0) + -) 0 n)))", "<Lambda>");
     TEST("(list (abs -3) (abs 0) (abs 3))", "(3 0 3)");
     TEST("(def combine (lambda (f)"
@@ -106,8 +106,16 @@ int tests()
     TEST("(require (dict (:sub \"tests/smth.htb\")))", "nil");
     TEST("(ns \"sub\" (print bid2 c2))", "nil");
     // other functions included by default
-    //TEST("(md5 \"hello\")", "\"5d41402abc4b2a76b9719d911017c592\"");
+    ///TEST("(md5 \"hello\")", "\"5d41402abc4b2a76b9719d911017c592\"");  // need to implement if in the standard lib
     TEST("(system \"echo\")", "0");
+    TEST("(typeof (random))", "\"Number\"");
+    // types
+    TEST("(typeof 1)", "\"Number\"");
+    // strings
+    TEST("(str-reverse \"hello\")", "\"olleh\"");
+    TEST("(str-cat \"hello \" \"world\")", "\"hello world\"");
+    TEST("(str-eq \"hello\" \"hello\")", "true");
+    ///TEST("(str-eq \"hello\" \"Æ\"", "false");  // not yet supporting UTF-8 strings
 
     std::cout
         << "total tests " << g_test_count

@@ -20,6 +20,10 @@
 
 #include <stdlib.h>
 
+#include <cstdio>
+
+#include <random>
+
 #define EXITSUCCESS 0x0
 #define EXITFAILURE 0x1
 
@@ -34,10 +38,7 @@
             dest.dict = base.dict; \
         else \
             dest.val = base.val;
-#define HANDLE_EXCEPTION(c) if (c.type == Exception) { \
-        std::stringstream ss; ss << c.val; \
-        return cell(Exception, ss.str()); \
-    }
+#define HANDLE_EXCEPTION(c) { if (c.type == Exception) return c; }
 #define FILE_NOT_FOUND std::string("<file not found>")
 #define LOAD_FILE(name) std::string content = ""; \
     if (check_if_file_exists(name)) { \

@@ -3,14 +3,6 @@
 namespace htb
 {
 
-std::string str(long n)
-{
-    std::ostringstream os;
-    os << n;
-
-    return os.str();
-}
-
 long to_long(const std::string& s)
 {
     std::stringstream b(s);

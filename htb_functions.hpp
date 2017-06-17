@@ -8,7 +8,14 @@ namespace htb
 {
 
 // simple tools
-std::string str(long n);
+template <typename T>
+std::string str(T v)
+{
+    std::ostringstream os;
+    os << v;
+
+    return os.str();
+}
 long to_long(const std::string& s);
 std::vector<std::string> split_string(const std::string& str, const std::string& delimiter);
 
