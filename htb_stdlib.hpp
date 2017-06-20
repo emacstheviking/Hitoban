@@ -17,6 +17,7 @@ cell proc_div(const cells& c);
 cell proc_and(const cells& c);
 cell proc_or(const cells& c);
 cell proc_pow(const cells& c);
+cell proc_modulo(const cells& c);
 
 cell proc_greater(const cells& c);
 cell proc_less(const cells& c);

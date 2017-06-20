@@ -80,7 +80,12 @@ std::string to_string(const cell& exp, bool from_htb)
     {
         std::string s("(");
         for (cell::iter e = exp.list.begin(); e != exp.list.end(); ++e)
-            s += to_string(*e) + ' ';
+        {
+            if ((*e) != exp)
+                s += to_string(*e) + ' ';
+            else
+                s += "... ";
+        }
         if (s[s.size() - 1] == ' ')
             s.erase(s.size() - 1);
         return s + ')';
@@ -91,10 +96,21 @@ std::string to_string(const cell& exp, bool from_htb)
         return "<Proc>";
     else if (exp.type == Exception)
         return "<Exception> " + exp.val;
-    else if (exp.type == Dict && !from_htb)
-        return "<Dict>";
-    else if (exp.type == Dict && from_htb)
-        return "{}";
+    else if (exp.type == Dict)
+    {
+        if (exp.dict.empty())
+            return "<Dict>";
+
+        std::string s("(");
+        for (auto& kv: exp.dict)
+        {
+            s += ':' + kv.first + ' ';
+            s += to_string(kv.second) + ' ';
+        }
+        if (s[s.size() - 1] == ' ')
+            s.erase(s.size() - 1);
+        return s + ')';
+    }
     else if (exp.type == String && !from_htb)
         return "\"" + exp.val + "\"";
     else if (exp.type == String && from_htb)

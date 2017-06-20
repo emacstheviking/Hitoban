@@ -1,0 +1,11 @@
+(ns "maths"
+    ; range function (range 0 10) => 0 .. 9
+    (def range (lambda (a b) (if (= a b) (quote ()) (cons a (range (+ a 1) b)))))
+    ; count down from X (begin (def count (count-down-from 4)) (count))
+    (def count-down-from (lambda (n) (lambda () (set! n (- n 1)))))
+    ; count from X to Y
+    (def count-to (lambda (x y) (lambda () (begin (const _x x) (if (= x y) nil (if (= x _x) (begin (set! x (+ x 1)) (- x 1)) (set! x (+ x 1))))))))
+    ; basic constants
+    (const e  2.7182818284590452353602874713527)
+    (const pi 3.1415926535867932384626433832795)
+)

@@ -90,13 +90,13 @@ int tests()
     TEST("(set-hidden 1234)", "1234");
     TEST("(get-hidden)", "1234");
     // dicts tests
-    TEST("(def dico (dict (list \"hello\" 1) (list \"other\" (list 4 5 6))))", "<Dict>");
+    TEST("(def dico (dict (list \"hello\" 1) (list \"other\" (list 4 5 6))))", "(:hello 1 :other (4 5 6))");
     TEST("(nth \"hello\" dico)", "1");
     TEST("(#other dico)", "(4 5 6)");
     TEST("(#hello dico)", "1");
     TEST("(keys dico)", "(\"hello\" \"other\")");
     TEST("(values dico)", "(1 (4 5 6))");
-    TEST("(def testdct (dict (:name \"truc\") (:machin (list 1 2 3 4))))", "<Dict>");
+    TEST("(def testdct (dict (:name \"truc\") (:machin (list 1 2 3 4))))", "(:machin (1 2 3 4) :name \"truc\")");
     TEST("(nth \"name\" testdct)", "\"truc\"");
     TEST("(nth \"machin\" testdct)", "(1 2 3 4)");
     // require tests (+ ns tests)
@@ -108,7 +108,7 @@ int tests()
     TEST("(require (dict (:sub \"tests/smth.htb\")))", "nil");
     TEST("(ns \"sub\" (print bid2 c2))", "nil");
     // other functions included by default
-    ///TEST("(md5 \"hello\")", "\"5d41402abc4b2a76b9719d911017c592\"");  // need to implement if in the standard lib
+    ///TEST("(md5 \"hello\")", "\"5d41402abc4b2a76b9719d911017c592\"");  // need to implement it in the standard lib
     TEST("(system \"echo\")", "0");
     TEST("(typeof (random))", "\"Number\"");
     // types

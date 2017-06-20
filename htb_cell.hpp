@@ -57,6 +57,16 @@ struct cell
         RAISE_IF(n >= long(list.size()), "Can not find the " << n << "th element in the list")
         return list[n];
     }
+
+    bool operator==(const cell& r) const
+    {
+        return std::addressof(*this) == std::addressof(r);
+    }
+
+    bool operator!=(const cell& r) const
+    {
+        return ! (r == *this);
+    }
 };
 
 typedef std::vector<cell> cells;

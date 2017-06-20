@@ -99,6 +99,14 @@ cell proc_pow(const cells& c)
     return cell(Number, str(std::pow(to_long(c[0].val), to_long(c[1].val))));
 }
 
+cell proc_modulo(const cells& c)
+{
+    RAISE_IF(c.size() != 2, "'modulo' needs only two arguments")
+    HANDLE_EXCEPTION(c[0])
+    HANDLE_EXCEPTION(c[1])
+    return cell(Number, str(to_long(c[0].val) % to_long(c[1].val)));
+}
+
 cell proc_greater(const cells& c)
 {
     RAISE_IF(c.size() < 2, "'gt' needs at least two arguments")
@@ -531,6 +539,7 @@ std::map<std::string, cell> get_builtin()
     builtin["&"] = cell(&proc_and);
     builtin["|"] = cell(&proc_or);
     builtin["^"] = cell(&proc_pow);
+    builtin["%"] = cell(&proc_modulo);
     /* conditionals operators */
     builtin[">"]  = cell(&proc_greater);
     builtin["<"] = cell(&proc_less);
