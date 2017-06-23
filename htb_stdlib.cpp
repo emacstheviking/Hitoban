@@ -122,6 +122,21 @@ cell proc_greater(const cells& c)
     return true_sym;
 }
 
+cell proc_great_equal(const cells& c)
+{
+    RAISE_IF(c.size() < 2, "'ge' needs at least two arguments")
+    HANDLE_EXCEPTION(c[0])
+    long n = to_long(c[0].val);
+    for (cellit i = c.begin()+1; i != c.end(); ++i)
+    {
+        HANDLE_EXCEPTION((*i))
+        RAISE_IF(i->type != Number, "Not a number : " << i->val)
+        if (n < to_long(i->val))
+            return false_sym;
+    }
+    return true_sym;
+}
+
 cell proc_less(const cells& c)
 {
     RAISE_IF(c.size() < 2, "'lt' needs at least two arguments")
@@ -544,6 +559,7 @@ std::map<std::string, cell> get_builtin()
     builtin[">"]  = cell(&proc_greater);
     builtin["<"] = cell(&proc_less);
     builtin["<="] = cell(&proc_less_equal);
+    builtin[">="] = cell(&proc_great_equal);
     builtin["="] = cell(&proc_eq);
     builtin["cond"] = cell(&proc_cond);
     /* dictionary */

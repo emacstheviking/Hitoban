@@ -20,6 +20,7 @@ cell proc_pow(const cells& c);
 cell proc_modulo(const cells& c);
 
 cell proc_greater(const cells& c);
+cell proc_great_equal(const cells& c);
 cell proc_less(const cells& c);
 cell proc_less_equal(const cells& c);
 cell proc_eq(const cells& c);
