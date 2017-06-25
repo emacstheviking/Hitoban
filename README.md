@@ -67,6 +67,10 @@ htb::cell value = htb::run_string("CODE HERE", env);
 std::cout << htb::to_string(value) << htb::endl;
 ```
 
+## Using Hitoban in Notepad++
+
+Download the [lang.xml](lang.xml) file. Then open Notepad++, go in `Language` > `Define your language` > `Import` (button) and select the lang.xml file you downloaded before. Then exit Notepad++ and restart it. You can now type Hitoban code and have it coloured ! :smile:
+
 # Building
 
 ## Building the Hitoban interpreter
@@ -81,9 +85,9 @@ To build and launch the tests : `make tests`
 
 # Documentation
 
-// link to documentation
+See the [specification](specification.md)
 
-For the moment, take a look at the syntax here : https://gist.github.com/Loodoor/f0a8cd0baf38449e43e787f91371a5c2
+You can also see the syntax here : https://gist.github.com/Loodoor/f0a8cd0baf38449e43e787f91371a5c2
 
 # Testing
 

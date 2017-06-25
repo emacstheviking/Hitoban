@@ -11,7 +11,6 @@ enum cell_type {
     Dict,
     Proc,
     Lambda,
-    Facultative,
     Exception
 };
 
