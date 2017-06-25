@@ -79,9 +79,9 @@ Download the [lang.xml](lang.xml) file. Then open Notepad++, go in `Language` > 
 
 To build and launch the tests : `make tests`
 
-# What's new
+<!-- # What's new
 
-// something new ? tell us
+// something new ? tell us -->
 
 # Documentation
 
