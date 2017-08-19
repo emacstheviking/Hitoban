@@ -8,8 +8,10 @@
 namespace htb
 {
 
-static bool strict = false;
-static bool tracking = false;
+///////////////////////////////////////////////////// constants
+
+static bool STRICT = false;
+static bool TRACKING = false;
 const std::vector<std::regex> regexs = {
     std::regex("^['\"][^'\"]+['\"]"),                         // strings
     std::regex("^:"),                                               // dict key symbol
@@ -21,7 +23,7 @@ const std::vector<std::regex> regexs = {
     std::regex("^;.*")                                            // comments
 };
 
-// define the bare minimum set of primitives necessary to pass the unit tests
+// define functions to create and modify an Hitoban shell
 void add_globals(environment& env)
 {
     env["nil"] = nil;
@@ -34,12 +36,12 @@ void add_globals(environment& env)
 
 void set_strict(bool s)
 {
-    strict = s;
+    STRICT = s;
 }
 
 void set_tracking(bool t)
 {
-    tracking = t;
+    TRACKING = t;
 }
 
 environment init_environment()
@@ -54,7 +56,7 @@ environment init_environment()
 
 cell eval(cell x, environment* env)
 {
-    if (tracking)
+    if (TRACKING)
     {
         std::cout << "x: " << to_string(x) << " "
                         << "[" << ((!env->has_outer()) ? "global" : "ref on global") << "]"
@@ -62,7 +64,7 @@ cell eval(cell x, environment* env)
     }
 
     // quitting if we got an exception
-    if (x.type == Exception && strict)
+    if (x.type == Exception && STRICT)
         throw std::runtime_error(std::string("Encountered an exception will in strict mode\n") + to_string(x));
 
     if (x.type == Symbol)
@@ -328,41 +330,11 @@ cell read(const std::string& s)
     return read_from(tokens);
 }
 
+// execute a string of Hitoban code, in a given environment
 cell run_string(const std::string& code, environment* env)
 {
     cell result = eval(read(code), env);
     return result;
-}
-
-// the default read-eval-print-loop
-void repl(const std::string& prompt, environment* env)
-{
-    for (;;)
-    {
-        std::cout << prompt;
-        std::string line;
-        std::getline(std::cin, line);
-        if (line == "help")
-        {
-            std::cout << "Type \"quit\" to quit the repl"
-                            << std::endl;
-        }
-        else if (line == "quit")
-        {
-            std::cout << "Bye !" << std::endl;
-            break;
-        }
-        else
-            std::cout << to_string(run_string(line, env)) << std::endl;
-    }
-}
-
-void print_shell_headers()
-{
-    std::cout << "Hitoban " << VER_FULLVERSION_STRING
-                    << " (last build on " << VER_DATE << "/" << VER_MONTH << "/" << VER_YEAR << ")"
-                    << " [status " << VER_STATUS << "]"
-                    << std::endl;
 }
 
 } // namespace htb
