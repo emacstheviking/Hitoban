@@ -10,8 +10,8 @@ namespace htb
 
 ///////////////////////////////////////////////////// constants
 
-static bool STRICT = false;
-static bool TRACKING = false;
+static bool htb_STRICT = false;
+static bool htb_TRACKING = false;
 const std::vector<std::regex> regexs = {
     std::regex("^['\"][^'\"]+['\"]"),                         // strings
     std::regex("^:"),                                               // dict key symbol
@@ -36,12 +36,12 @@ void add_globals(environment& env)
 
 void set_strict(bool s)
 {
-    STRICT = s;
+    htb_STRICT = s;
 }
 
 void set_tracking(bool t)
 {
-    TRACKING = t;
+    htb_TRACKING = t;
 }
 
 environment init_environment()
@@ -56,15 +56,16 @@ environment init_environment()
 
 cell eval(cell x, environment* env)
 {
-    if (TRACKING)
+    if (htb_TRACKING)
     {
-        std::cout << "x: " << to_string(x) << " "
-                        << "[" << ((!env->has_outer()) ? "global" : "ref on global") << "]"
+        std::cout << log(termcolor::cyan, "x: " << to_string(x)) << " "
+                        << log(termcolor::yellow, "[" << ((!env->has_outer()) ? ((!env->is_isolated()) ? "global" : "isolated") : "ref on global") << "]") << " "
+                        << log(termcolor::green, ((env->isfile) ? (std::string("is a file `") + env->fname +"`") : "not a file"))
                         << std::endl;
     }
 
     // quitting if we got an exception
-    if (x.type == Exception && STRICT)
+    if (x.type == Exception && htb_STRICT)
         throw std::runtime_error(std::string("Encountered an exception will in strict mode\n") + to_string(x));
 
     if (x.type == Symbol)
@@ -157,7 +158,10 @@ cell eval(cell x, environment* env)
             HANDLE_EXCEPTION(x.list[1])
             // we set is_ins to true
             environment* sub = env->get_namespace(x.list[1].val, true);
+            // we need a set of primitives !!
             add_globals(*sub);
+            // just if we need to (require ...) in it, we NEED to know in which file we are c:
+            sub->fname = env->get_parent_file();
 
             if (x.list.size() > 2)
                 for (unsigned int i = 2; i < x.list.size(); ++i)
@@ -174,12 +178,14 @@ cell eval(cell x, environment* env)
             {
                 for (cellit i = c.list.begin(); i != c.list.end(); i++)
                 {
-                    READ_FILE((*i), env)
+                    environment* sub = env->get_namespace(to_string(*i));
+                    READ_FILE((*i), sub)
                 }
             }
             else if (c.type == String)
             {
-                READ_FILE(c, env)
+                environment* sub = env->get_namespace(to_string(c));
+                READ_FILE(c, sub)
             }
             else if (c.type == Dict)
             {
@@ -191,8 +197,7 @@ cell eval(cell x, environment* env)
             }
             else
             {
-                std::stringstream ss; ss << "require' takes a dict, a list or a single string as an argument, not a " << convert_htbtype(c.type) << std::endl;
-                return cell(Exception, ss.str());
+                RAISE("require' takes a dict, a list or a single string as an argument, not a " << convert_htbtype(c.type))
             }
             return nil;
         }
@@ -227,7 +232,7 @@ cell eval(cell x, environment* env)
             exp.list.push_back(eval(*e, env));
         return exp;
     }
-    return cell(Exception, "Not a function");
+    RAISE("Not a function")
 }
 
 ///////////////////////////////////////////////////// parse, read and user interaction
@@ -400,7 +405,7 @@ int main(int argc, char *argv[])
         }
         if (input == "-v")  // version
         {
-            std::cout << "Hitoban " << htb::VER_FULLVERSION_STRING << std::endl;
+            htb::print_shell_headers();
             return EXITSUCCESS;
         }
         if (input == "tests")  // running the tests
@@ -411,8 +416,12 @@ int main(int argc, char *argv[])
         {
             std::string content = htb::read_file(input);
 
+            // setting up environment
             htb::environment global_env;
             htb::add_globals(global_env);
+            // we must save that we are in a file !
+            global_env.isfile = true;
+            global_env.fname = input;
 
             // checking for arguments
             if (argc >= c + 2)

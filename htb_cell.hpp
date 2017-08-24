@@ -73,7 +73,7 @@ typedef std::vector<cell> cells;
 typedef cells::const_iterator cellit;
 
 const cell false_sym(Symbol, "false");
-const cell true_sym(Symbol, "true"); // anything that isn't false_sym is true
+const cell true_sym(Symbol, "true"); // anything that isn't false_sym is true_sym
 const cell nil(Symbol, "nil");
 
 ///////////////////////////////////////////////////// environment
@@ -81,13 +81,18 @@ const cell nil(Symbol, "nil");
 // a dictionary that (a) associates symbols with cells, and
 // (b) can chain to an "outer" dictionary
 struct environment {
+    bool isfile;
+    std::string fname;
+
     environment(environment* outer=0, bool isolated=false) :
-        outer_(outer)
+        isfile(false)
+        , outer_(outer)
         , isolated_(isolated)
     {}
 
     environment(const cells& parms, const cells& args, environment* outer) :
-        outer_(outer)
+        isfile(false)
+        , outer_(outer)
         , isolated_(false)
     {
         cellit a = args.begin();
@@ -133,26 +138,46 @@ struct environment {
     // get a namespace or create one
     environment* get_namespace(const std::string& name, bool is_ins=false)
     {
-        if (outer_ == 0)
+        bool found_in_self = namespaces.find(name) == namespaces.end();
+        if (outer_ == 0 || found_in_self)
         {
-            if (namespaces.find(name) == namespaces.end())
+            if (found_in_self)
             {
                 if (!is_ins)
-                {
                     namespaces[name] = new environment(this);
-                }
                 else
-                {
                     namespaces[name] = new environment(0, true);
-                }
             }
+            return namespaces[name];
         }
+        return outer_->get_namespace(name, is_ins);
+    }
+
+    // search for an environment which is a file, and return its path
+    std::string get_parent_file()
+    {
+        if (isfile)  // simplest case
+            return fname;
         else
         {
-            outer_->get_namespace(name, is_ins);
+            if (outer_ != 0)
+            {
+                // we have a bigger environment containing this one
+                return outer_->get_parent_file();
+            }
+            else if (outer_ == 0 && isolated_)
+            {
+                // we are an isolated namespace, great because we are storing the path of the file when creating it
+                return fname;
+            }
+            else
+            {
+                // --> if (outer_ == 0 && !isolated_)
+                // note : we SHOULD NOT be here, never. but just in this case, going to return something :
+                // "" to tell we are in the root directory, = do not change directory
+                return "";
+            }
         }
-
-        return namespaces[name];
     }
 
 private:

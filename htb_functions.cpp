@@ -140,4 +140,20 @@ std::string get_filename(const std::string& path)
     return path.substr(found + 1);
 }
 
+std::string get_fullpath(const std::string& name, environment* base)
+{
+    std::string o = base->get_parent_file();
+
+    if (o == "")  // we are in the root directory
+        o = name;
+    else
+    {
+        // we must crop the filename from the output given by base->get_parent_file()
+        std::size_t pos = o.find_last_of("/\\");
+        o = o.substr(0, pos) + "/" + name;
+    }
+
+    return o;
+}
+
 } // namespace htb

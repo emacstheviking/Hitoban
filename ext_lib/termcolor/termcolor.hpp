@@ -36,6 +36,7 @@
 #   include <stdio.h>
 #   include <io.h>
 #   include <windows.h>
+#   define _fileno(__F) ((__F)->_file)
 #endif
 
 

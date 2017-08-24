@@ -31,5 +31,6 @@ std::string to_string(const cell& exp, bool from_htb=false);
 bool check_if_file_exists(const std::string& filename);
 std::string read_file(const std::string& filename);
 std::string get_filename(const std::string& path);
+std::string get_fullpath(const std::string& name, environment* base);
 
 } // namespace htb
