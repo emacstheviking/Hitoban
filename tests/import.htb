@@ -1,0 +1,5 @@
+(begin
+    (require "sub/sub.htb") ; sub.htb is importing sub2.htb
+    (print "import.htb")
+    (print ">> " (ns "sub2.htb" value))
+)

@@ -1,0 +1,4 @@
+(begin
+    (def value "it is working, well played :)")
+    (print "sub2.htb")
+)
