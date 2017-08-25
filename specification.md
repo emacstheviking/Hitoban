@@ -18,6 +18,8 @@ You can name a variable following this rule :
 
 So `@#$:hello-_world` is a valid variable name
 
+You can not start a variable name with `#` or `:` because those two characters take a special meaning under certain circumstances (this will be described below)
+
 ## Language defined constants
 
 `nil` => None (in Python)
@@ -30,13 +32,13 @@ All the available operators :
 
 `+ - * / % <= >= != < > = & | ^`
 
-`%` is the modulo
+* `%` is the modulo
 
-`&` an `and`
+* `&` an `and`
 
-`|` an or
+* `|` an `or`
 
-`^` pow
+* `^` the `pow`
 
 ## Types
 
@@ -52,9 +54,7 @@ So, `-5.e+17` is a number
 
 Defined as follow :
 
-`^['"][^'"]+['"]`
-
-As strange as it is, `"test'` is a valid string
+`^"[^"]+"`
 
 ### Lists
 
@@ -117,13 +117,15 @@ Only single line comments using `; your comment here`
 
 You can access elements (or add, it is the same to Hitoban) just by using `(ns "name" your-code-here...)`
 
-`(i-ns "name" ...)` => same as `ns` but does not inherit from upper environment, only basics procedures are included in the *isolated namespace* created
+`(require "file.htb")` => include the Hitoban code in `file.htb` in a namespace `file.htb`
 
-`(require "file.htb")` => include the Hitoban code in `file.htb` in the current environment
-
-`(require (list "file1.htb" "file2.htb"))` => include the Hitoban code, in all the specified files, in the current environment
+`(require (list "file1.htb" "file2.htb"))` => include the Hitoban code, in all the specified files, in their namespaces, as `(require "file.htb")` do
 
 `(require (dict (:maths "lib/maths.htb")))` => include the maths lib in a namespace `maths`
+
+`(list-current-ns)` => return a list of all the namespaces available
+
+`(get-opened-file)` => return the name of the current file evaluated
 
 ## Conditions
 
