@@ -40,9 +40,9 @@ OBJDIR_RELEASE = obj/Release
 DEP_RELEASE = 
 OUT_RELEASE = bin/Release/hitoban
 
-OBJ_DEBUG = $(OBJDIR_DEBUG)/ext_lib/fmt/format.o $(OBJDIR_DEBUG)/hitoban.o $(OBJDIR_DEBUG)/htb_functions.o $(OBJDIR_DEBUG)/htb_stdlib.o $(OBJDIR_DEBUG)/htb_tests.o
+OBJ_DEBUG = $(OBJDIR_DEBUG)/ext_lib/fmt/format.o $(OBJDIR_DEBUG)/hitoban.o $(OBJDIR_DEBUG)/htb_functions.o $(OBJDIR_DEBUG)/htb_shell.o $(OBJDIR_DEBUG)/htb_stdlib.o $(OBJDIR_DEBUG)/htb_tests.o
 
-OBJ_RELEASE = $(OBJDIR_RELEASE)/ext_lib/fmt/format.o $(OBJDIR_RELEASE)/hitoban.o $(OBJDIR_RELEASE)/htb_functions.o $(OBJDIR_RELEASE)/htb_stdlib.o $(OBJDIR_RELEASE)/htb_tests.o
+OBJ_RELEASE = $(OBJDIR_RELEASE)/ext_lib/fmt/format.o $(OBJDIR_RELEASE)/hitoban.o $(OBJDIR_RELEASE)/htb_functions.o $(OBJDIR_RELEASE)/htb_shell.o $(OBJDIR_RELEASE)/htb_stdlib.o $(OBJDIR_RELEASE)/htb_tests.o
 
 all: debug release
 
@@ -68,6 +68,9 @@ $(OBJDIR_DEBUG)/hitoban.o: hitoban.cpp
 
 $(OBJDIR_DEBUG)/htb_functions.o: htb_functions.cpp
 	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c htb_functions.cpp -o $(OBJDIR_DEBUG)/htb_functions.o
+
+$(OBJDIR_DEBUG)/htb_shell.o: htb_shell.cpp
+	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c htb_shell.cpp -o $(OBJDIR_DEBUG)/htb_shell.o
 
 $(OBJDIR_DEBUG)/htb_stdlib.o: htb_stdlib.cpp
 	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c htb_stdlib.cpp -o $(OBJDIR_DEBUG)/htb_stdlib.o
@@ -101,6 +104,9 @@ $(OBJDIR_RELEASE)/hitoban.o: hitoban.cpp
 
 $(OBJDIR_RELEASE)/htb_functions.o: htb_functions.cpp
 	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c htb_functions.cpp -o $(OBJDIR_RELEASE)/htb_functions.o
+
+$(OBJDIR_RELEASE)/htb_shell.o: htb_shell.cpp
+	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c htb_shell.cpp -o $(OBJDIR_RELEASE)/htb_shell.o
 
 $(OBJDIR_RELEASE)/htb_stdlib.o: htb_stdlib.cpp
 	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c htb_stdlib.cpp -o $(OBJDIR_RELEASE)/htb_stdlib.o
