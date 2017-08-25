@@ -31,7 +31,7 @@
 
 #define log(color, msg)  color << msg << termcolor::reset
 
-#define RAISE(msg) {std::stringstream ss; ss << log(termcolor::red, msg); return cell(Exception, ss.str());}
+#define RAISE(msg) {std::stringstream ss; ss << msg; return cell(Exception, ss.str());}
 #define RAISE_IF(cd, msg) if (cd) { RAISE(msg) }
 #define COPY(base, dest) cell dest(base.type); \
         if (dest.type == List) \
@@ -42,13 +42,12 @@
             dest.val = base.val;
 #define HANDLE_EXCEPTION(c) { if (c.type == Exception) return c; }
 #define FILE_NOT_FOUND std::string("<file not found>")
-#define LOAD_FILE(name, baseenv) std::string content = ""; std::string fullname = get_fullpath(name, baseenv); \
-    if (check_if_file_exists(fullname)) { \
-        content = read_file(fullname); \
-    } /*else if (check_if_file_exists(STDLIB + "/" + name)) {}*/ \
-    else { \
-        content = FILE_NOT_FOUND; \
-    }
+#define LOAD_FILE(name, baseenv) std::string content = "", fullname = get_fullpath(name, baseenv); \
+    bool exists = check_if_file_exists(fullname) | check_if_file_exists(name); \
+    if (exists) { \
+        if (name.length() > 3 && name.substr(0, 3) == "lib") content = read_file(name); \
+        else content = read_file(fullname); \
+    } else content = FILE_NOT_FOUND;
 #define READ_FILE(name, env) HANDLE_EXCEPTION(name) \
         RAISE_IF(name.type != String, "'require' needs strings, not " << convert_htbtype(name.type)) \
         LOAD_FILE(name.val, env) \

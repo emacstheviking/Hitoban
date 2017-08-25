@@ -35,14 +35,9 @@ void repl(const std::string& prompt, environment* env)
         else if (line == "license")
         {
             if (check_if_file_exists("LICENSE"))
-            {
-                std::cout << read_file("LICENSE") << std::endl
-                                << std::endl;
-            }
+                std::cout << read_file("LICENSE") << std::endl;
             else
-            {
                 std::cout << "Can not find LICENSE file. Please only download Hitoban from the official repository : https://github.com/Loodoor/Hitoban/releases" << std::endl;
-            }
         }
         else
             std::cout << to_string(run_string(line, env)) << std::endl;

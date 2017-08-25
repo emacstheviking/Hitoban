@@ -180,6 +180,15 @@ struct environment {
         }
     }
 
+    // return a list of string (names of the available namespaces)
+    std::list<std::string> get_namespaces()
+    {
+        std::list<std::string> ns;
+        for (auto kv : namespaces)
+            ns.push_back(kv.first);
+        return ns;
+    }
+
 private:
     map env_; // inner symbol->cell mapping
     map errors;
