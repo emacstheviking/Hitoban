@@ -13,7 +13,7 @@ namespace htb
 static bool htb_STRICT = false;
 static bool htb_TRACKING = false;
 const std::vector<std::regex> regexs = {
-    std::regex("^['\"][^'\"]+['\"]"),                         // strings
+    std::regex("^['\"][^'\"]*['\"]"),                         // strings
     std::regex("^:"),                                               // dict key symbol
     std::regex("^[\\(\\)]"),                                      // parenthesis
     std::regex("^((\\+|-)?[[:digit:]]+)(\\.(([[:digit:]]+)?))?((e|E)((\\+|-)?)[[:digit:]]+)?"),                  // numbers
@@ -59,8 +59,9 @@ cell eval(cell x, environment* env)
     if (htb_TRACKING)
     {
         std::cout << log(termcolor::cyan, "x: " << to_string(x)) << " "
-                        << log(termcolor::yellow, "[" << ((!env->has_outer()) ? ((!env->is_isolated()) ? "global" : "isolated") : "ref on global") << "]") << " "
-                        << log(termcolor::green, ((env->isfile) ? (std::string("is a file `") + env->fname +"`") : "not a file"))
+                        << log(termcolor::yellow, "[" << ((!env->has_outer()) ? ((!env->is_isolated()) ? "global" : "isolated") : "ref on global")) << ", "
+                            << log(termcolor::green, ((env->isfile) ? (std::string("is a file `") + env->fname +"`") : "not a file"))
+                        << log(termcolor::yellow, "]")
                         << std::endl;
     }
 
@@ -160,7 +161,7 @@ cell eval(cell x, environment* env)
             environment* sub = env->get_namespace(x.list[1].val, true);
             // we need a set of primitives !!
             add_globals(*sub);
-            // just if we need to (require ...) in it, we NEED to know in which file we are c:
+            // just if we need to (require ...) in it, we NEED to know in which file we are
             sub->fname = env->get_parent_file();
 
             if (x.list.size() > 2)
@@ -178,13 +179,13 @@ cell eval(cell x, environment* env)
             {
                 for (cellit i = c.list.begin(); i != c.list.end(); i++)
                 {
-                    environment* sub = env->get_namespace(to_string(*i));
+                    environment* sub = env->get_namespace(get_filename(to_string(*i)));
                     READ_FILE((*i), sub)
                 }
             }
             else if (c.type == String)
             {
-                environment* sub = env->get_namespace(to_string(c));
+                environment* sub = env->get_namespace(get_filename(to_string(c)));
                 READ_FILE(c, sub)
             }
             else if (c.type == Dict)
@@ -196,10 +197,25 @@ cell eval(cell x, environment* env)
                 }
             }
             else
-            {
                 RAISE("require' takes a dict, a list or a single string as an argument, not a " << convert_htbtype(c.type))
-            }
             return nil;
+        }
+        ///////////////////////////////////////////////////// procedures that need to use an environment (not provided in htb_stdlib because it only takes cells)
+        if (x.list[0].val == "list-current-ns")  // (list-current-ns file)
+        {
+            RAISE_IF(x.list.size() != 2, "'list-current-ns' takes only one argument (string)")
+            HANDLE_EXCEPTION(x.list[1])
+            RAISE_IF(x.list[1].type != String, "'list-current-ns' argument's should be of type string, not of type " << convert_htbtype(x.list[1].type))
+            cell output(List);
+            for (auto name : env->get_namespaces())
+                output.list.push_back(cell(String, name));
+            return output;
+        }
+        if (x.list[0].val == "get-opened-file")  // (get-opened-file)
+        {
+            RAISE_IF(x.list.size() != 1, "'get-opened-file' takes no argument")
+            std::string fname = env->get_parent_file();
+            return cell(String, fname);
         }
     }
 
@@ -440,7 +456,7 @@ int main(int argc, char *argv[])
             }
 
             // running the code
-            htb::run_string(content, &global_env);
+            std::cout << to_string(htb::run_string(content, &global_env)) << std::endl;
         }
         else
         {
