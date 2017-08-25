@@ -11,7 +11,7 @@ namespace htb
 
 struct environment; // forward declaration; cell and environment reference each other
 
-// a variant that can hold any kind of lisp value
+// a variant that can hold any kind of Hitoban value
 struct cell
 {
     typedef cell (*proc_type)(const std::vector<cell>&);
@@ -84,16 +84,14 @@ struct environment {
     bool isfile;
     std::string fname;
 
-    environment(environment* outer=0, bool isolated=false) :
+    environment(environment* outer=0) :
         isfile(false)
         , outer_(outer)
-        , isolated_(isolated)
     {}
 
     environment(const cells& parms, const cells& args, environment* outer) :
         isfile(false)
         , outer_(outer)
-        , isolated_(false)
     {
         cellit a = args.begin();
         for (cellit p = parms.begin(); p != parms.end(); ++p)
@@ -124,33 +122,43 @@ struct environment {
         return env_[var];
     }
 
-    // return true if the environment is isolated
-    bool is_isolated()
-    {
-        return isolated_;
-    }
-
     bool has_outer()
     {
         return outer_ != 0;
     }
 
     // get a namespace or create one
-    environment* get_namespace(const std::string& name, bool is_ins=false)
+    environment* get_namespace(const std::string& name)
     {
-        bool found_in_self = namespaces.find(name) == namespaces.end();
-        if (outer_ == 0 || found_in_self)
+        bool found_in_self = namespaces.find(name) != namespaces.end();
+
+        if (!found_in_self)
         {
-            if (found_in_self)
+            if (outer_ != 0)
             {
-                if (!is_ins)
-                    namespaces[name] = new environment(this);
-                else
-                    namespaces[name] = new environment(0, true);
+                environment* temp = outer_->_get_namespace(name);
+                if (temp != 0)
+                    return temp;
             }
-            return namespaces[name];
+            namespaces[name] = new environment(this);
         }
-        return outer_->get_namespace(name, is_ins);
+        return namespaces[name];
+    }
+
+    // get a namespace or return 0 if it doesn't exist
+    environment* _get_namespace(const std::string& name)
+    {
+        bool found_in_self = namespaces.find(name) != namespaces.end();
+
+        if (found_in_self)
+            return namespaces[name];
+        else
+        {
+            // check outer_ or return 0
+            if (outer_ != 0)
+                return _get_namespace(name);
+            return 0;
+        }
     }
 
     // search for an environment which is a file, and return its path
@@ -160,23 +168,9 @@ struct environment {
             return fname;
         else
         {
-            if (outer_ != 0)
-            {
-                // we have a bigger environment containing this one
+            if (outer_ != 0)  // we have a bigger environment containing this one
                 return outer_->get_parent_file();
-            }
-            else if (outer_ == 0 && isolated_)
-            {
-                // we are an isolated namespace, great because we are storing the path of the file when creating it
-                return fname;
-            }
-            else
-            {
-                // --> if (outer_ == 0 && !isolated_)
-                // note : we SHOULD NOT be here, never. but just in this case, going to return something :
-                // "" to tell we are in the root directory, = do not change directory
-                return "";
-            }
+            return fname;
         }
     }
 
@@ -194,7 +188,6 @@ private:
     map errors;
     std::map<std::string, environment*> namespaces;
     environment* outer_; // next adjacent outer env, or 0 if there are no further environments
-    bool isolated_;
 };
 
 } // namespace htb

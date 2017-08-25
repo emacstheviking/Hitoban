@@ -13,7 +13,7 @@ namespace htb
 static bool htb_STRICT = false;
 static bool htb_TRACKING = false;
 const std::vector<std::regex> regexs = {
-    std::regex("^['\"][^'\"]*['\"]"),                         // strings
+    std::regex("^\"[^\"]*\""),                         // strings
     std::regex("^:"),                                               // dict key symbol
     std::regex("^[\\(\\)]"),                                      // parenthesis
     std::regex("^((\\+|-)?[[:digit:]]+)(\\.(([[:digit:]]+)?))?((e|E)((\\+|-)?)[[:digit:]]+)?"),                  // numbers
@@ -23,7 +23,7 @@ const std::vector<std::regex> regexs = {
     std::regex("^;.*")                                            // comments
 };
 
-// define functions to create and modify an Hitoban shell
+// define functions to create and modify an Hitoban environment
 void add_globals(environment& env)
 {
     env["nil"] = nil;
@@ -58,11 +58,13 @@ cell eval(cell x, environment* env)
 {
     if (htb_TRACKING)
     {
-        std::cout << log(termcolor::cyan, "x: " << to_string(x)) << " "
-                        << log(termcolor::yellow, "[" << ((!env->has_outer()) ? ((!env->is_isolated()) ? "global" : "isolated") : "ref on global")) << ", "
-                            << log(termcolor::green, ((env->isfile) ? (std::string("is a file `") + env->fname +"`") : "not a file"))
-                        << log(termcolor::yellow, "]")
-                        << std::endl;
+        std::string nx = to_string(x);
+        if (std::string::npos != nx.find_first_not_of(" \t\v\r\n"))
+            std::cout << log(termcolor::cyan, "x: " << nx) << " "
+                            << log(termcolor::yellow, "[" << ((!env->has_outer()) ? "global": "ref on global")) << ", "
+                                << log(termcolor::green, ((env->isfile) ? (std::string("is a file `") + env->fname +"`") : "not a file"))
+                            << log(termcolor::yellow, "]")
+                            << std::endl;
     }
 
     // quitting if we got an exception
@@ -138,7 +140,10 @@ cell eval(cell x, environment* env)
         if (x.list[0].val == "begin")   // (begin exp*)
         {
             for (unsigned int i = 1; i < x.list.size() - 1; ++i)
-                eval(x.list[i], env);
+            {
+                cell c = eval(x.list[i], env);
+                HANDLE_EXCEPTION(c)
+            }
             return eval(x.list[x.list.size() - 1], env);
         }
         if (x.list[0].val == "ns")  // (ns "name" ...)
@@ -149,24 +154,10 @@ cell eval(cell x, environment* env)
 
             if (x.list.size() > 2)
                 for (unsigned int i = 2; i < x.list.size(); ++i)
-                    eval(x.list[i], sub);
-
-            return nil;
-        }
-        if (x.list[0].val == "i-ns")  // (i-ns "name" ...)
-        {
-            RAISE_IF(x.list.size() < 2, "'i-ns' needs at least one argument 'name' (string)")
-            HANDLE_EXCEPTION(x.list[1])
-            // we set is_ins to true
-            environment* sub = env->get_namespace(x.list[1].val, true);
-            // we need a set of primitives !!
-            add_globals(*sub);
-            // just if we need to (require ...) in it, we NEED to know in which file we are
-            sub->fname = env->get_parent_file();
-
-            if (x.list.size() > 2)
-                for (unsigned int i = 2; i < x.list.size(); ++i)
-                    eval(x.list[i], sub);
+                {
+                    cell c = eval(x.list[i], sub);
+                    HANDLE_EXCEPTION(c)
+                }
 
             return nil;
         }
@@ -203,9 +194,7 @@ cell eval(cell x, environment* env)
         ///////////////////////////////////////////////////// procedures that need to use an environment (not provided in htb_stdlib because it only takes cells)
         if (x.list[0].val == "list-current-ns")  // (list-current-ns file)
         {
-            RAISE_IF(x.list.size() != 2, "'list-current-ns' takes only one argument (string)")
-            HANDLE_EXCEPTION(x.list[1])
-            RAISE_IF(x.list[1].type != String, "'list-current-ns' argument's should be of type string, not of type " << convert_htbtype(x.list[1].type))
+            RAISE_IF(x.list.size() != 1, "'list-current-ns' takes only no argument")
             cell output(List);
             for (auto name : env->get_namespaces())
                 output.list.push_back(cell(String, name));
