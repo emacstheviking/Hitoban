@@ -88,10 +88,12 @@ If either there is no argument to give or no body, the bloc must be present, eve
 
 The value of the last bloc evaluated in the body of the lambda is the returned value when calling it :
 
-```(lambda (x) (begin
+```
+(lambda (x) (begin
     (set! x (+ x 3))
     x
-))```
+))
+```
 
 will return x+3
 
@@ -159,7 +161,6 @@ You can access elements (or add, it is the same to Hitoban) just by using `(ns "
 
 `cond` => example :
 
-```
 (cond (
         (< x 10)
         (print "x < 10")
@@ -169,7 +170,6 @@ You can access elements (or add, it is the same to Hitoban) just by using `(ns "
         (print "all the tests failed")
     )
 )
-```
 
 `values` => returns a list containing the values of a given dictionary (copying)
 
