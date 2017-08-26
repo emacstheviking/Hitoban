@@ -1,5 +1,5 @@
 (begin
-    (ns "other" ())
+    (ns "other")
     (require "sub/sub.htb") ; sub.htb is importing sub2.htb
     (print "import.htb")
     (print ">" (get-opened-file) "<")
