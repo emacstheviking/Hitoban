@@ -12,6 +12,8 @@ and all those brackets make a Hitoban code looks like a millipede. :)
 We chosed a lisp-like syntax because it was really easy to tokenize and to parse, and so to execute. The main purpose of this language is to offer something reliable, with 
 the less bugs possible (goal is 0), and very easy to use in any C++ project. So you understand why the grammar is so basic and can seems to be redundant. :wink:
 
+Original idea from @ofan (see https://gist.github.com/ofan/721464)
+
 # Goals
 
 * no bugs
