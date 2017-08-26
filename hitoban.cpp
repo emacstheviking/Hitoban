@@ -59,12 +59,11 @@ cell eval(cell x, environment* env)
     if (htb_TRACKING)
     {
         std::string nx = to_string(x);
-        if (std::string::npos != nx.find_first_not_of(" \t\v\r\n"))
-            std::cout << log(termcolor::cyan, "x: " << nx) << " "
-                            << log(termcolor::yellow, "[" << ((!env->has_outer()) ? "global": "ref on global")) << ", "
-                                << log(termcolor::green, ((env->isfile) ? (std::string("is a file `") + env->fname +"`") : "not a file"))
-                            << log(termcolor::yellow, "]")
-                            << std::endl;
+        std::cout << log(termcolor::cyan, "x: " << nx) << " "
+                        << log(termcolor::yellow, "[" << ((!env->has_outer()) ? "global": "ref on global")) << ", "
+                            << log(termcolor::green, ((env->isfile) ? (std::string("is a file `") + env->fname +"`") : "not a file"))
+                        << log(termcolor::yellow, "]")
+                        << std::endl;
     }
 
     // quitting if we got an exception
@@ -170,13 +169,13 @@ cell eval(cell x, environment* env)
             {
                 for (cellit i = c.list.begin(); i != c.list.end(); i++)
                 {
-                    environment* sub = env->get_namespace(get_filename(to_string(*i)));
+                    environment* sub = env->get_namespace(get_filename(to_string(*i, true)));
                     READ_FILE((*i), sub)
                 }
             }
             else if (c.type == String)
             {
-                environment* sub = env->get_namespace(get_filename(to_string(c)));
+                environment* sub = env->get_namespace(get_filename(to_string(c, true)));
                 READ_FILE(c, sub)
             }
             else if (c.type == Dict)
@@ -289,7 +288,7 @@ std::list<std::string> tokenize(const std::string& str)
             if (std::regex_search(s, m, r))
             {
                 std::string m0(m[0]);
-                if (!contains_only(m[0], ' ') && m0.substr(0, 1) != ";")
+                if (std::string::npos != m0.find_first_not_of(" \t\v\r\n") && m0.substr(0, 1) != ";")
                     tokens.push_back(m[0]);
                 s = std::regex_replace(s, r, std::string(""), std::regex_constants::format_first_only);
                 ok = true;

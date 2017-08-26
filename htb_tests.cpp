@@ -101,7 +101,8 @@ int tests()
     TEST("(nth \"machin\" testdct)", "(1 2 3 4)");
     // require tests (+ ns tests)
     TEST("(require (list \"tests/simple.htb\"))", "nil");
-    TEST("(ns \"truc\" (print hello bid c))", "nil");
+    TEST("(print (list-current-ns))", "nil");
+    TEST("(ns \"simple.htb\" (ns \"truc\" (print hello bid c)))", "nil");
     TEST("(ns \"test\" (def ns_test_a 5))", "nil");
     TEST("(print ns_test_a)", "<Exception> Unbound symbol 'ns_test_a'");
     TEST("(ns \"test\" (print ns_test_a))", "nil");
