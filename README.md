@@ -14,6 +14,8 @@ the less bugs possible (goal is 0), and very easy to use in any C++ project. So 
 
 Original idea from @ofan (see https://gist.github.com/ofan/721464)
 
+See a demo in video right there :
+
 [![Hitoban demonstration](http://img.youtube.com/vi/IdgDsYX4yiE/0.jpg)](http://www.youtube.com/watch?v=IdgDsYX4yiE)
 
 # Goals
