@@ -1,4 +1,4 @@
-; importing the standard lib
+; importing all the standard lib
 (begin
     (require "maths/import.htb")
 )

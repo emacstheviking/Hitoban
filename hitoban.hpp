@@ -28,6 +28,13 @@ cell run_string(const std::string& code, environment* env);
 void repl(const std::string& prompt, environment* env);
 void print_shell_headers();
 
+namespace internal {
+
+cell _read_file(cell* name, environment* baseenv, bool ns=true);
+std::string _load_file(const std::string& name, environment* baseenv);
+
+}  // namespace internal
+
 ///////////////////////////////////////////////////// tests
 static unsigned g_test_count;      // count of number of unit tests executed
 static unsigned g_fault_count;     // count of number of unit tests that fail
@@ -48,4 +55,4 @@ void test_equal_(const T1& value, const T2& expected_value, const char* litteral
 }
 int tests();
 
-}
+}  // namespace htb
