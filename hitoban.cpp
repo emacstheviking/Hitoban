@@ -169,19 +169,19 @@ cell eval(cell x, environment* env)
             {
                 for (cellit i = c.list.begin(); i != c.list.end(); i++)
                 {
-                    internal::_read_file(i, env);
+                    HANDLE_EXCEPTION(internal::_read_file((*i), env))
                 }
             }
             else if (c.type == String)
             {
-                internal::_read_file(&c, env);
+                HANDLE_EXCEPTION(internal::_read_file(c, env))
             }
             else if (c.type == Dict)
             {
                 for (auto kv: c.dict)
                 {
                     environment* sub = env->get_namespace(kv.first);
-                    internal::_read_file(&kv.second, sub, false);
+                    HANDLE_EXCEPTION(internal::_read_file(kv.second, sub, false))
                 }
             }
             else

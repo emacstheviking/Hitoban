@@ -30,7 +30,7 @@ void print_shell_headers();
 
 namespace internal {
 
-cell _read_file(cell* name, environment* baseenv, bool ns=true);
+cell _read_file(cell name, environment* baseenv, bool ns=true);
 std::string _load_file(const std::string& name, environment* baseenv);
 
 }  // namespace internal

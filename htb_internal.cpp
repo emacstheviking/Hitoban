@@ -4,29 +4,35 @@ namespace htb {
 
 namespace internal {
 
-cell _read_file(cell* name, environment* baseenv, bool ns)
+cell _read_file(cell name, environment* baseenv, bool ns)
 {
-    RAISE_IF(name->type != String, "'require' needs strings, not " << convert_htbtype(name->type))
-    std::string content = _load_file(name->val, baseenv);
-    RAISE_IF(content == FILE_NOT_FOUND, "Can not find the required file '" << name->val << "'")
+    RAISE_IF(name.type != String, "'require' needs strings, not " << convert_htbtype(name.type))
+    std::string content = _load_file(name.val, baseenv);
+    RAISE_IF(content == FILE_NOT_FOUND, "Can not find the required file '" << name.val << "'")
 
+    std::string _filename = to_string(name, true);
+    std::string _fullname = get_fullpath(name.val, baseenv);
     baseenv->isfile = true;
-    baseenv->fname = fullname;
+    baseenv->fname = _fullname;
 
-    std::string _filename = to_string(*name, true);
     if (ns)
     {
-        /// if lib in filename extended, do not add sub env
-        if (_filename.length() > 3 && _filename.substr(0, 3) == "lib")
-            run_string(content, baseenv);
+        // if lib in filename, do not add sub env, the lib is creating its own namespaces
+        if (_fullname.length() > 3 && _fullname.substr(0, 3) == "lib")
+        {
+            HANDLE_EXCEPTION(run_string(content, baseenv))
+        }
         else
         {
-            environment* sub = env->get_namespace(get_filename(_filename));
-            run_string(content, sub);
-        }  /// use sub to run the file
+            environment* sub = baseenv->get_namespace(get_filename(_filename));
+            // use sub to run the file because it isn't a file from the lib
+            HANDLE_EXCEPTION(run_string(content, sub))
+        }
     }
     else
-        run_string(content, baseenv);
+    {
+        HANDLE_EXCEPTION(run_string(content, baseenv))
+    }
 
     return nil;
 }

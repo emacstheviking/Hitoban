@@ -146,6 +146,8 @@ std::string get_fullpath(const std::string& name, environment* base)
 
     if (o == "")  // we are in the root directory
         o = name;
+    else if (name.length() > 3 && name.substr(0, 3) == "lib")  // for the lib, we must extend the name differently
+        o = name;
     else
     {
         // we must crop the filename from the output given by base->get_parent_file()
