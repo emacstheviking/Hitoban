@@ -1,4 +1,4 @@
-# Hitoban
+[Hitoban](logo.png)
 
 [![Build Status](https://travis-ci.org/Loodoor/Hitoban.svg?branch=master)](https://travis-ci.org/Loodoor/Hitoban)
 
