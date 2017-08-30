@@ -4,10 +4,10 @@ namespace htb {
 
 namespace internal {
 
-cell _read_file(cell name, environment* baseenv, bool ns)
+cell read_file(cell name, environment* baseenv, bool ns)
 {
     RAISE_IF(name.type != String, "'require' needs strings, not " << convert_htbtype(name.type))
-    std::string content = _load_file(name.val, baseenv);
+    std::string content = load_file(name.val, baseenv);
     RAISE_IF(content == FILE_NOT_FOUND, "Can not find the required file '" << name.val << "'")
 
     std::string _filename = to_string(name, true);
@@ -37,7 +37,7 @@ cell _read_file(cell name, environment* baseenv, bool ns)
     return nil;
 }
 
-std::string _load_file(const std::string& name, environment* baseenv)
+std::string load_file(const std::string& name, environment* baseenv)
 {
     std::string content = "";
     // extend path regarding to the environment
