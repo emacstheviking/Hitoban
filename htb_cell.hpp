@@ -187,15 +187,37 @@ struct environment {
     // register a C++ function as an Hitoban one
     template <typename Fun>
     void register_function(Fun& f, const std::string& name)
-    {/*
-        internal::addListener(disp.events[0].listeners, freestanding);
-        internal::addListener(disp.events[1].listeners, freestandingInt);
-        disp.dispatch(0);
-        disp.dispatch(1, 5);
-    */}
+    {
+        std::cout << "### " << disp.events.size() << " ";
+        internal::addListener(disp.events[disp.events.size()].listeners, f);
+        cppfun_names.push_back(name);
+        std::cout << "### " << disp.events.size() << std::endl;
+    }
+
+    // call a C++ function
+    cell call_function(const std::string& name, const cells& c)
+    {
+        bool exists = std::find(cppfun_names.begin(), cppfun_names.end(), name) != cppfun_names.end();
+        if (exists)
+        {
+            // everything is okay, we found the function
+            size_t pos = std::find(cppfun_names.begin(), cppfun_names.end(), name) - cppfun_names.begin();
+            internal::propertyListType parsed_args_list = convert_cells_to_values(c);
+            /*auto ball = */disp.dispatch(pos, parsed_args_list);
+            /// get the type (in Hitoban version) of the ball and return a proper htb::cell
+            return nil;  /// temp
+        }
+        else if (!exists && outer_ == 0)
+        {
+            RAISE("Can not find the binded function named '" << name << "'")
+        }
+        else  // search in outer_
+            return outer_->call_function(name, c);
+    }
 
 private:
     internal::Dispatcher disp;
+    std::vector<std::string> cppfun_names;
     map env_; // inner symbol->cell mapping
     map errors;
     std::map<std::string, environment*> namespaces;
