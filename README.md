@@ -18,7 +18,7 @@ See a demo in video right there :
 
 [![Hitoban demonstration](http://img.youtube.com/vi/IdgDsYX4yiE/0.jpg)](http://www.youtube.com/watch?v=IdgDsYX4yiE)
 
-# Goals
+# Goals 📃
 
 * no bugs
 * 0 dependencies
@@ -27,13 +27,13 @@ See a demo in video right there :
 
 # Using Hitoban
 
-## How to execute a Hitoban file
+## How to execute a Hitoban file ▶️
 
 `./hitoban [file path here] [args]`
 
 Arguments, which must be separated by spaces, are given to the script into a `const list` called `ARGS`.
 
-## Using the Hitoban shell
+## Using the Hitoban shell 💻
 
 `./hitoban -w` => turns Hitoban in strict mode (should stop after getting an exception). Raises a `std::runtime_error`
 
@@ -59,7 +59,7 @@ Type "help" for more information.
 > 
 ```
 
-## Using Hitoban in a C++ project
+## Using Hitoban in a C++ project ✏️
 
 Download the [project](https://github.com/Loodoor/Hitoban/archive/master.zip) and extract it in a directory called `hitoban` (for example) in your project.
 
@@ -77,7 +77,7 @@ std::cout << htb::to_string(value) << htb::endl;
 
 Download the [lang.xml](lang.xml) file. Then open Notepad++, go in `Language` > `Define your language` > `Import` (button) and select the lang.xml file you downloaded before. Then exit Notepad++ and restart it. You can now type Hitoban code and have it coloured ! :smile:
 
-# Building
+# Building 🛠
 
 ## Building the Hitoban interpreter
 
@@ -89,13 +89,13 @@ To build and launch the tests : `make tests`
 
 // something new ? tell us -->
 
-# Documentation
+# Documentation 🔗
 
 See the [specification](specification.md)
 
 You can also see the syntax here : https://gist.github.com/Loodoor/f0a8cd0baf38449e43e787f91371a5c2
 
-# Testing
+# Testing 🔥
 
 Call the Hitoban interpreter with the option `tests`, as following :
 
@@ -112,11 +112,11 @@ hello 6
 total tests 77, total failures 0
 ```
 
-# Proposal for enhancement
+# Proposal for enhancement 🔮
 
-If you have any idea to improve the language, please open an issue and tag it as `PFP` (Proposal For Enhancement). We will try to review as soon as possible, and if
-your PFP is accepted (and developed by the way), it will be published under https://kyatchioru.tk/Hitoban/PFP
+If you have any idea to improve the language, please open an issue and tag it as `PFP` (Proposal For Enhancement). <!-- We will try to review as soon as possible, and if
+your PFP is accepted (and developed by the way), it will be published under https://kyatchioru.tk/Hitoban/PFP -->
 
-# Copyright and license
+# Copyright and license 🔓
 
 The project is currently developed by Loodoor, and is under MIT license, so feel free to use it in any commercial project or whatever.
