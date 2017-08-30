@@ -10,6 +10,7 @@ enum cell_type {
     List,
     Dict,
     Proc,
+    Fun,
     Lambda,
     Exception
 };

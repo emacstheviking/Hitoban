@@ -203,6 +203,11 @@ cell eval(cell x, environment* env)
             std::string fname = env->get_parent_file();
             return cell(String, fname);
         }
+        if (x.list[0].val == "isdef")  // (isdef x)
+        {
+            RAISE_IF(x.list[1].type != Symbol, "'isdef' needs a variable as an argument, not a " << convert_htbtype(x.list[1].type))
+            return (env->find(x.list[1].val)[x.list[1].val].type != Exception) ? true_sym : false_sym;
+        }
     }
 
     // (proc exp*)
@@ -442,7 +447,7 @@ int main(int argc, char *argv[])
             }
 
             // running the code
-            std::cout << to_string(htb::run_string(content, &global_env)) << std::endl;
+            std::cout << htb::to_string(htb::run_string(content, &global_env)) << std::endl;
         }
         else
         {

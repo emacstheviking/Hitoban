@@ -3,6 +3,7 @@
 #include "htb_types.hpp"
 #include "htb_includes.hpp"
 #include "htb_functions.hpp"
+#include "htb_binding.hpp"
 
 namespace htb
 {
@@ -67,7 +68,7 @@ struct cell
     {
         return ! (r == *this);
     }
-};
+};  // struct cell
 
 typedef std::vector<cell> cells;
 typedef cells::const_iterator cellit;
@@ -183,11 +184,22 @@ struct environment {
         return ns;
     }
 
+    // register a C++ function as an Hitoban one
+    template <typename Fun>
+    void register_function(Fun& f, const std::string& name)
+    {/*
+        internal::addListener(disp.events[0].listeners, freestanding);
+        internal::addListener(disp.events[1].listeners, freestandingInt);
+        disp.dispatch(0);
+        disp.dispatch(1, 5);
+    */}
+
 private:
+    internal::Dispatcher disp;
     map env_; // inner symbol->cell mapping
     map errors;
     std::map<std::string, environment*> namespaces;
     environment* outer_; // next adjacent outer env, or 0 if there are no further environments
-};
+};  // struct environment
 
 } // namespace htb

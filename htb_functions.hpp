@@ -16,6 +16,13 @@ std::string str(T v)
 
     return os.str();
 }
+template <typename T>
+T str_to(const std::string& v)
+{
+    T t; std::stringstream b(v);
+    b >> t;
+    return t;
+}
 long to_long(const std::string& s);
 std::vector<std::string> split_string(const std::string& str, const std::string& delimiter);
 

@@ -5,11 +5,7 @@ namespace htb
 
 long to_long(const std::string& s)
 {
-    std::stringstream b(s);
-    long out;
-    b >> out;
-
-    return out;
+    return str_to<long>(s);
 }
 
 std::vector<std::string> split_string(const std::string& str, const std::string& delimiter)
@@ -51,6 +47,8 @@ std::string convert_htbtype(cell_type type)
         out = "Dict";
     else if (type == Proc)
         out = "Proc";
+    else if (type == Fun)
+        out = "Fun";
     else if (type == Lambda)
         out = "Lambda";
     else if (type == Exception)
@@ -94,6 +92,8 @@ std::string to_string(const cell& exp, bool from_htb)
         return "<Lambda>";
     else if (exp.type == Proc)
         return "<Proc>";
+    else if (exp.type == Fun)
+        return "<Fun @ " + str(std::addressof(exp)) + ">";
     else if (exp.type == Exception)
         return "<Exception> " + exp.val;
     else if (exp.type == Dict)
