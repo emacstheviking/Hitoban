@@ -30,8 +30,8 @@ void print_shell_headers();
 
 namespace internal {
 
-cell read_file(cell name, environment* baseenv, bool ns=true);
-std::string load_file(const std::string& name, environment* baseenv);
+cell read_htb_file(cell name, environment* baseenv, bool ns=true);
+std::string load_htb_file(const std::string& name, environment* baseenv);
 
 }  // namespace internal
 
