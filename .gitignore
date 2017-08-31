@@ -4,3 +4,5 @@ obj/*
 *.cbp
 *.depend
 *.layout
+_makefileTests.txt
+makemakefile.bat
