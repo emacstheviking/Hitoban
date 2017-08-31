@@ -4,7 +4,7 @@
 
 # Introduction
 
-Hitoban is an interpreted programming language, in C++ (which respects the C++11 norm). It is a lisp-like (no please don't quit us now !) :smiley:
+Hitoban is an interpreted programming language, in C++ (which respects the C++14 norm). It is a lisp-like (no please don't quit us now !) :smiley:
 
 For the small history, the language is named like this because a "millipede" is called "Hitoban" in Japanese, 
 and all those brackets make a Hitoban code looks like a millipede. :)
@@ -23,7 +23,7 @@ See a demo in video right there :
 * no bugs
 * 0 dependencies
 * do not stop on exception, or at least try
-* no warning when compiling with `g++ -Wall -std=c++11 -pedantic -Wextra -g`
+* no warning when compiling with `g++ -Wall -std=c++14 -pedantic -Wextra -g`
 
 # Using Hitoban
 
@@ -77,6 +77,10 @@ std::cout << htb::to_string(value) << htb::endl;
 
 Download the [lang.xml](lang.xml) file. Then open Notepad++, go in `Language` > `Define your language` > `Import` (button) and select the lang.xml file you downloaded before. Then exit Notepad++ and restart it. You can now type Hitoban code and have it coloured ! :smile:
 
+## Using Hitoban in Atom
+
+Coming soon
+
 # Building 🛠
 
 ## Building the Hitoban interpreter
@@ -85,15 +89,9 @@ Download the [lang.xml](lang.xml) file. Then open Notepad++, go in `Language` > 
 
 To build and launch the tests : `make tests`
 
-<!-- # What's new
-
-// something new ? tell us -->
-
 # Documentation 🔗
 
 See the [specification](specification.md)
-
-You can also see the syntax here : https://gist.github.com/Loodoor/f0a8cd0baf38449e43e787f91371a5c2
 
 # Testing 🔥
 
