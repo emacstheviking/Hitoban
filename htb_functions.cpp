@@ -49,8 +49,6 @@ std::string convert_htbtype(cell_type type)
         out = "Dict";
     else if (type == Proc)
         out = "Proc";
-    else if (type == Fun)
-        out = "Fun";
     else if (type == Lambda)
         out = "Lambda";
     else if (type == Exception)
@@ -94,8 +92,6 @@ std::string to_string(const cell& exp, bool from_htb)
         return "<Lambda>";
     else if (exp.type == Proc)
         return "<Proc>";
-    else if (exp.type == Fun)
-        return "<Fun @ " + str(std::addressof(exp)) + ">";
     else if (exp.type == Exception)
         return "<Exception> " + exp.val;
     else if (exp.type == Dict)
@@ -146,16 +142,21 @@ std::string get_fullpath(const std::string& name, environment* base)
 {
     std::string o = base->get_parent_file();
 
+    // get base directory of both file
+    std::size_t pos = o.find_last_of("/\\");
+    std::string bo = (pos != std::string::npos) ? o.substr(0, pos) : o;
+    // ---
+    std::size_t pos2 = name.find_last_of("/\\");
+    std::string bn = (pos2 != std::string::npos) ? name.substr(0, pos2) : name;
+
     if (o == "")  // we are in the root directory
         o = name;
     else if (name.length() > 3 && name.substr(0, 3) == "lib")  // for the lib, we must extend the name differently
         o = name;
-    else
-    {
-        // we must crop the filename from the output given by base->get_parent_file()
-        std::size_t pos = o.find_last_of("/\\");
-        o = o.substr(0, pos) + "/" + name;
-    }
+    else if (bo == bn)  // files are in the same directory
+        o = name;
+    else  // we must crop the filename from the output given by base->get_parent_file()
+        o = bo + "/" + name;
 
     return o;
 }

@@ -181,7 +181,7 @@ cell eval(cell x, environment* env)
                 for (auto kv: c.dict)
                 {
                     environment* sub = env->get_namespace(kv.first);
-                    HANDLE_EXCEPTION(internal::read_htb_file(kv.second, sub, false))
+                    HANDLE_EXCEPTION(internal::read_htb_file(kv.second, env, sub))
                 }
             }
             else
@@ -207,17 +207,6 @@ cell eval(cell x, environment* env)
         {
             RAISE_IF(x.list[1].type != Symbol, "'isdef' needs a variable as an argument, not a " << convert_htbtype(x.list[1].type))
             return (env->find(x.list[1].val)[x.list[1].val].type != Exception) ? true_sym : false_sym;
-        }
-        if (x.list[0].val == "call")  // (call cppfun ...)
-        {
-            RAISE_IF(x.list[1].type != Symbol, "'call' needs a variable as an argument, not a " << convert_htbtype(x.list[1].type))
-            cells exps;
-            if (x.list.size() > 2)
-            {
-                for (cell::iter exp = x.list.begin() + 2; exp != x.list.end(); ++exp)
-                    exps.push_back(eval(*exp, env));
-            }
-            HANDLE_EXCEPTION(env->call_function(x.list[1].val, exps))
         }
     }
 
@@ -362,16 +351,6 @@ cell run_string(const std::string& code, environment* env)
 
 } // namespace htb
 
-void first_test()
-{
-    std::cout << "hello from c++" << std::endl;
-}
-
-void sec_test(int i)
-{
-    std::cout << "i need an int : " << i << std::endl;
-}
-
 int start_repl()
 {
     htb::print_shell_headers();
@@ -380,10 +359,6 @@ int start_repl()
 
     htb::environment global_env;
     htb::add_globals(global_env);
-    /// testing
-    htb::register_function(first_test, "first_test", &global_env);
-    htb::register_function(sec_test, "sec_test", &global_env);
-    /// end
     htb::repl("> ", &global_env);
 
     return EXITSUCCESS;

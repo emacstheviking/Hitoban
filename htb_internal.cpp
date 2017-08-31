@@ -4,7 +4,7 @@ namespace htb {
 
 namespace internal {
 
-cell read_htb_file(cell name, environment* baseenv, bool ns)
+cell read_htb_file(cell name, environment* baseenv, environment* ns)
 {
     RAISE_IF(name.type != String, "'require' needs strings, not " << convert_htbtype(name.type))
     std::string content = load_htb_file(name.val, baseenv);
@@ -12,10 +12,19 @@ cell read_htb_file(cell name, environment* baseenv, bool ns)
 
     std::string _filename = to_string(name, true);
     std::string _fullname = get_fullpath(name.val, baseenv);
-    baseenv->isfile = true;
-    baseenv->fname = _fullname;
 
-    if (ns)
+    if (ns == 0)
+    {
+        baseenv->isfile = true;
+        baseenv->fname = _fullname;
+    }
+    else
+    {
+        ns->isfile = true;
+        ns->fname = _fullname;
+    }
+
+    if (ns == 0)
     {
         // if lib in filename, do not add sub env, the lib is creating its own namespaces
         if (_fullname.length() > 3 && _fullname.substr(0, 3) == "lib")
@@ -31,7 +40,7 @@ cell read_htb_file(cell name, environment* baseenv, bool ns)
     }
     else
     {
-        HANDLE_EXCEPTION(run_string(content, baseenv))
+        HANDLE_EXCEPTION(run_string(content, ns))
     }
 
     return nil;
@@ -42,7 +51,7 @@ std::string load_htb_file(const std::string& name, environment* baseenv)
     std::string content = "";
     // extend path regarding to the environment
     std::string fullname = get_fullpath(name, baseenv);
-    // check in user code and in the lib
+    // check in user code or in the lib
     bool exists = check_if_file_exists(fullname) | check_if_file_exists(name);
     if (exists)
     {

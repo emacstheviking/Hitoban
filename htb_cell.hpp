@@ -3,7 +3,6 @@
 #include "htb_types.hpp"
 #include "htb_includes.hpp"
 #include "htb_functions.hpp"
-#include "htb_binding.hpp"
 
 namespace htb
 {
@@ -84,7 +83,7 @@ const cell nil(Symbol, "nil");
 struct environment {
     bool isfile;
     std::string fname;
-    internal::Dispatcher disp;
+    environment* outer_; // next adjacent outer env, or 0 if there are no further environments
 
     environment(environment* outer=0) :
         isfile(false)
@@ -185,39 +184,10 @@ struct environment {
         return ns;
     }
 
-    // register a C++ function as an Hitoban one
-    void register_function(const std::string& name)
-    {
-        cppfun_names.push_back(name);
-    }
-
-    // call a C++ function
-    cell call_function(const std::string& name, const cells& c)
-    {
-        bool exists = std::find(cppfun_names.begin(), cppfun_names.end(), name) != cppfun_names.end();
-        if (exists)
-        {
-            // everything is okay, we found the function
-            size_t pos = std::find(cppfun_names.begin(), cppfun_names.end(), name) - cppfun_names.begin();
-            internal::absObjList parsed_args_list = convert_cells_to_values(c);
-            /*auto ball = */disp.dispatch(pos, parsed_args_list);
-            /// get the type (in Hitoban version) of the ball and return a proper htb::cell
-            return nil;  /// temp
-        }
-        else if (!exists && outer_ == 0)
-        {
-            RAISE("Can not find the binded function named '" << name << "'")
-        }
-        else  // search in outer_
-            return outer_->call_function(name, c);
-    }
-
 private:
-    std::vector<std::string> cppfun_names;
     map env_; // inner symbol->cell mapping
     map errors;
     std::map<std::string, environment*> namespaces;
-    environment* outer_; // next adjacent outer env, or 0 if there are no further environments
 };  // struct environment
 
 } // namespace htb

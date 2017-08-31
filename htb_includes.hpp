@@ -24,12 +24,6 @@
 #include "ext_lib/fmt/format.hpp"
 #include <unordered_map>
 
-#include <tuple>
-#include <memory>
-#include <typeindex>
-#include <functional>
-#include <iterator>
-
 #include "ext_lib/termcolor/termcolor.hpp"
 
 #define EXITSUCCESS 0x0

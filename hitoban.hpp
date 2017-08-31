@@ -5,7 +5,6 @@
 #include "htb_cell.hpp"
 #include "htb_stdlib.hpp"
 #include "htb_version.hpp"
-#include "htb_binding.hpp"
 
 // write a message to std::cout if value != expected_value
 #define TEST_EQUAL(value, expected_value, litteral_value) test_equal_(value, expected_value, litteral_value, __FILE__, __LINE__)
@@ -31,19 +30,10 @@ void print_shell_headers();
 
 namespace internal {
 
-cell read_htb_file(cell name, environment* baseenv, bool ns=true);
+cell read_htb_file(cell name, environment* baseenv, environment* ns=0);
 std::string load_htb_file(const std::string& name, environment* baseenv);
 
 }  // namespace internal
-
-template <typename Fun>
-void register_function(Fun& f, const std::string& name, environment* env)
-{
-    std::cout << "### " << env->disp.events.size() << " ";
-    internal::addListener(env->disp.events[env->disp.events.size()].listeners, f);
-    std::cout << "### " << env->disp.events.size() << std::endl;
-    env->register_function(name);
-}
 
 ///////////////////////////////////////////////////// tests
 static unsigned g_test_count;      // count of number of unit tests executed
