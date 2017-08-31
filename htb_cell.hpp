@@ -84,6 +84,7 @@ const cell nil(Symbol, "nil");
 struct environment {
     bool isfile;
     std::string fname;
+    internal::Dispatcher disp;
 
     environment(environment* outer=0) :
         isfile(false)
@@ -185,13 +186,9 @@ struct environment {
     }
 
     // register a C++ function as an Hitoban one
-    template <typename Fun>
-    void register_function(Fun& f, const std::string& name)
+    void register_function(const std::string& name)
     {
-        std::cout << "### " << disp.events.size() << " ";
-        internal::addListener(disp.events[disp.events.size()].listeners, f);
         cppfun_names.push_back(name);
-        std::cout << "### " << disp.events.size() << std::endl;
     }
 
     // call a C++ function
@@ -216,7 +213,6 @@ struct environment {
     }
 
 private:
-    internal::Dispatcher disp;
     std::vector<std::string> cppfun_names;
     map env_; // inner symbol->cell mapping
     map errors;

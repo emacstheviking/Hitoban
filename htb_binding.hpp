@@ -2,7 +2,6 @@
 
 #include "htb_includes.hpp"
 
-
 namespace htb
 {
 
@@ -13,6 +12,19 @@ typedef std::vector<cell> cells;
 
 namespace internal
 {
+
+///////////////////////////////////////////////////// in order to count how many args take a std::function
+
+template <typename Signature>
+struct count_args;
+
+template <typename Ret, typename... Args>
+struct count_args<std::function<Ret(Args...)>>
+{
+    static constexpr size_t value = sizeof...(Args);
+};  // struct count_args
+
+///////////////////////////////////////////////////// stuff to store functions
 
 // basic class for all functions
 struct Function
@@ -47,7 +59,15 @@ static void callListeners(const Listeners& listeners, Args&&... args)
     std::type_index index(typeid(Func));
     Listeners::const_iterator i = listeners.lower_bound(index);
     Listeners::const_iterator j = listeners.upper_bound(index);
+    int a = std::distance(listeners.begin(), i);
+    int b = std::distance(listeners.begin(), j);
 
+    if (a == b && b == 0)
+    {
+        const Function& addr = *i->second;
+        std::function<Func> f = static_cast<const BasicFunction<Func>&>(addr).func;
+        f(std::forward<Args>(args)...);
+    }
     for (; i != j; ++i)
     {
         const Function& addr = *i->second;
@@ -71,31 +91,35 @@ struct Dispatcher
     std::map<int, Event> events;
 };
 
-struct Property
+///////////////////////////////////////////////////// stuff to store any type of data
+
+struct AbsObj  // AbstractObject Interface
 {
-    Property() {}
-    virtual ~Property() {}
+    AbsObj() {}
+    virtual ~AbsObj() {}
 
     std::string name;
-};  // struct Property
+};  // struct AbsObj
 
 template <typename T>
-struct TypedProperty : Property
+struct TypedObj : AbsObj
 {
-    TypedProperty(const T& _data) :
-        Property()
+    TypedObj(const T& _data) :
+        TypedObj()
         , data(_data)
     {}
 
     T data;
-};  // struct TypedProperty
+};  // struct TypedObj
 
-typedef std::vector<std::shared_ptr<Property>> propertyListType;
-typedef std::map<std::string, std::shared_ptr<Property>> propertyMapType;
+typedef std::vector<std::shared_ptr<AbsObj>> absObjList;
+typedef std::map<std::string, std::shared_ptr<AbsObj>> absObjMap;
 
 }  // namespace internal
 
-internal::propertyListType convert_cells_to_values(const cells& c);
-std::shared_ptr<internal::Property> convert_cell(const cell& c);
+///////////////////////////////////////////////////// to convert Hitoban values to C++ ones
+
+internal::absObjList convert_cells_to_values(const cells& c);
+std::shared_ptr<internal::AbsObj> convert_cell(const cell& c);
 
 }  // namespace htb

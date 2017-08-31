@@ -213,8 +213,10 @@ cell eval(cell x, environment* env)
             RAISE_IF(x.list[1].type != Symbol, "'call' needs a variable as an argument, not a " << convert_htbtype(x.list[1].type))
             cells exps;
             if (x.list.size() > 2)
+            {
                 for (cell::iter exp = x.list.begin() + 2; exp != x.list.end(); ++exp)
                     exps.push_back(eval(*exp, env));
+            }
             HANDLE_EXCEPTION(env->call_function(x.list[1].val, exps))
         }
     }
@@ -360,6 +362,11 @@ cell run_string(const std::string& code, environment* env)
 
 } // namespace htb
 
+void first_test()
+{
+    std::cout << "hello from c++" << std::endl;
+}
+
 int start_repl()
 {
     htb::print_shell_headers();
@@ -368,6 +375,9 @@ int start_repl()
 
     htb::environment global_env;
     htb::add_globals(global_env);
+    /// testing
+    htb::register_function(first_test, "first_test", &global_env);
+    /// end
     htb::repl("> ", &global_env);
 
     return EXITSUCCESS;

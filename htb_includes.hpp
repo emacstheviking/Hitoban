@@ -28,6 +28,7 @@
 #include <memory>
 #include <typeindex>
 #include <functional>
+#include <iterator>
 
 #include "ext_lib/termcolor/termcolor.hpp"
 

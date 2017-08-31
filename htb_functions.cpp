@@ -1,5 +1,7 @@
 #include "htb_functions.hpp"
 
+#include "htb_cell.hpp"
+
 namespace htb
 {
 

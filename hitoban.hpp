@@ -39,7 +39,10 @@ std::string load_htb_file(const std::string& name, environment* baseenv);
 template <typename Fun>
 void register_function(Fun& f, const std::string& name, environment* env)
 {
-    env->register_function(f, name);
+    std::cout << "### " << env->disp.events.size() << " ";
+    internal::addListener(env->disp.events[env->disp.events.size()].listeners, f);
+    std::cout << "### " << env->disp.events.size() << std::endl;
+    env->register_function(name);
 }
 
 ///////////////////////////////////////////////////// tests

@@ -2,10 +2,13 @@
 
 #include "htb_includes.hpp"
 #include "htb_types.hpp"
-#include "htb_cell.hpp"
 
 namespace htb
 {
+
+// forward declarations
+struct cell;
+struct environment;
 
 // simple tools
 template <typename T>
