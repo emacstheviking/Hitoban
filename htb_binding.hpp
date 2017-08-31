@@ -24,6 +24,28 @@ struct count_args<std::function<Ret(Args...)>>
     static constexpr size_t value = sizeof...(Args);
 };  // struct count_args
 
+///////////////////////////////////////////////////// stuff to store any type of data
+
+struct AbsObj  // AbstractObject Interface
+{
+    AbsObj() {}
+    virtual ~AbsObj() {}
+};  // struct AbsObj
+
+template <typename T>
+struct TypedObj : AbsObj
+{
+    TypedObj(const T& _data) :
+        AbsObj()
+        , data(_data)
+    {}
+
+    T data;
+};  // struct TypedObj
+
+typedef std::vector<std::shared_ptr<AbsObj>> absObjList;
+typedef std::map<std::string, std::shared_ptr<AbsObj>> absObjMap;
+
 ///////////////////////////////////////////////////// stuff to store functions
 
 // basic class for all functions
@@ -82,38 +104,13 @@ struct Dispatcher
         Listeners listeners;
         } Event;
 
-    template<class... Args>
-    void dispatch(int eventNr, Args&&... args)
+    void dispatch(int eventNr, const absObjList& parsed_args)
     {
-        callListeners(events[eventNr].listeners, std::forward<Args>(args)...);
+        callListeners(events[eventNr].listeners, parsed_args);
     }
 
     std::map<int, Event> events;
 };
-
-///////////////////////////////////////////////////// stuff to store any type of data
-
-struct AbsObj  // AbstractObject Interface
-{
-    AbsObj() {}
-    virtual ~AbsObj() {}
-
-    std::string name;
-};  // struct AbsObj
-
-template <typename T>
-struct TypedObj : AbsObj
-{
-    TypedObj(const T& _data) :
-        TypedObj()
-        , data(_data)
-    {}
-
-    T data;
-};  // struct TypedObj
-
-typedef std::vector<std::shared_ptr<AbsObj>> absObjList;
-typedef std::map<std::string, std::shared_ptr<AbsObj>> absObjMap;
 
 }  // namespace internal
 

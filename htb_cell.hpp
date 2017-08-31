@@ -199,7 +199,7 @@ struct environment {
         {
             // everything is okay, we found the function
             size_t pos = std::find(cppfun_names.begin(), cppfun_names.end(), name) - cppfun_names.begin();
-            internal::propertyListType parsed_args_list = convert_cells_to_values(c);
+            internal::absObjList parsed_args_list = convert_cells_to_values(c);
             /*auto ball = */disp.dispatch(pos, parsed_args_list);
             /// get the type (in Hitoban version) of the ball and return a proper htb::cell
             return nil;  /// temp

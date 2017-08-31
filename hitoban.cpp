@@ -367,6 +367,11 @@ void first_test()
     std::cout << "hello from c++" << std::endl;
 }
 
+void sec_test(int i)
+{
+    std::cout << "i need an int : " << i << std::endl;
+}
+
 int start_repl()
 {
     htb::print_shell_headers();
@@ -377,6 +382,7 @@ int start_repl()
     htb::add_globals(global_env);
     /// testing
     htb::register_function(first_test, "first_test", &global_env);
+    htb::register_function(sec_test, "sec_test", &global_env);
     /// end
     htb::repl("> ", &global_env);
 
