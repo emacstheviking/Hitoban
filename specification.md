@@ -129,6 +129,10 @@ You can access elements (or add, it is the same to Hitoban) just by using `(ns "
 
 `(get-opened-file)` => return the name of the current file evaluated
 
+`(isdef x)` => return `true` is `x` is defined, otherwise `false` (check in current namespace and upper only)
+
+`(call cpp_function_name args...)` => call `cpp_function_name` which should be a binded C++ function, with `args...` (as many arguments as you want, but ensure you give the correct number of arguments)
+
 ## Conditions
 
 `(if cond then alt)` `alt` is optional
