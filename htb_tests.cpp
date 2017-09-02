@@ -31,11 +31,13 @@ namespace htb
             TEST("(+ (* 2 100) (* 1 10))", "210");
             TEST("(nth 4 \"hello\")", "\"o\"");
             TEST("(#1 \"hello\")", "\"e\"");
+
             // arrays tests
             TEST("(def array (list 4 5 6 7 8))", "(4 5 6 7 8)");
             TEST("(def floating 5.5)", "5.5");
             TEST("(#2 array)", "6");
             TEST("(nth 2 array)", "6");
+
             // conditions tests
             TEST("(if (> 6 5) (+ 1 1) (+ 2 2))", "2");
             TEST("(if (< 6 5) (+ 1 1) (+ 2 2))", "4");
@@ -46,6 +48,7 @@ namespace htb
             TEST("(cond ((< 1 0) false) (nil true))", "true");
             TEST("(cond ((= 1 0) false))", "nil");
             TEST("(cond ((= 0 1) 0) ((= 1 1) 1) ((= 2 2) 2))", "1");
+
             // lambdas tests
             TEST("((lambda (x) (+ x x)) 5)", "10");
             TEST("(def twice (lambda (x) (* 2 x)))", "<Lambda>");
@@ -57,7 +60,6 @@ namespace htb
             TEST("((repeat (repeat twice)) 5)", "80");
             TEST("(def fact (lambda (n) (if (<= n 1) 1 (* n (fact (- n 1))))))", "<Lambda>");
             TEST("(fact 3)", "6");
-            ///TEST("(fact 50)", "30414093201713378043612608166064768844377641568960512000000000000");
             TEST("(fact 12)", "479001600");  // no bignums; this is as far as we go with 32 bits
             TEST("(def abs (lambda (n) ((if (> n 0) + -) 0 n)))", "<Lambda>");
             TEST("(list (abs -3) (abs 0) (abs 3))", "(3 0 3)");
@@ -89,6 +91,7 @@ namespace htb
             TEST("(truuc)", "5");
             TEST("(truuc)", "6");
             TEST("(truuc)", "nil");
+
             // closures tests
             TEST("(def set-hidden 0)", "0");
             TEST("(def get-hidden 0)", "0");
@@ -100,6 +103,8 @@ namespace htb
             TEST("(get-hidden)", "0");
             TEST("(set-hidden 1234)", "1234");
             TEST("(get-hidden)", "1234");
+            TEST("(isdef hidden)", "false");
+
             // dicts tests
             TEST("(def dico (dict (list \"hello\" 1) (list \"other\" (list 4 5 6))))", "(:hello 1 :other (4 5 6))");
             TEST("(nth \"hello\" dico)", "1");
@@ -110,33 +115,39 @@ namespace htb
             TEST("(def testdct (dict (:name \"truc\") (:machin (list 1 2 3 4))))", "(:machin (1 2 3 4) :name \"truc\")");
             TEST("(nth \"name\" testdct)", "\"truc\"");
             TEST("(nth \"machin\" testdct)", "(1 2 3 4)");
+
             // require tests (+ ns tests)
             TEST("(require (list \"tests/simple.htb\"))", "nil");
-            TEST("(print (list-current-ns))", "nil");
             TEST("(ns \"simple.htb\" (ns \"truc\" (print hello bid c)))", "nil");
             TEST("(ns \"test\" (def ns_test_a 5))", "nil");
             TEST("(print ns_test_a)", "<Exception> Unbound symbol 'ns_test_a'");
             TEST("(ns \"test\" (print ns_test_a))", "nil");
             TEST("(require (dict (:sub \"tests/smth.htb\")))", "nil");
             TEST("(ns \"sub\" (print bid2 c2))", "nil");
+            TEST("(list-current-ns)", "(\"simple.htb\" \"sub\" \"test\")");
+
             // other functions included by default
-            ///TEST("(md5 \"hello\")", "\"5d41402abc4b2a76b9719d911017c592\"");  // need to implement it in the standard lib
+            //TEST("(md5 \"hello\")", "\"5d41402abc4b2a76b9719d911017c592\"");  // need to implement it in the standard lib
             TEST("(system \"echo\")", "0");
             TEST("(typeof (random))", "\"Number\"");
+
             // types
             TEST("(typeof 1)", "\"Number\"");
+
             // strings
             TEST("(str-reverse \"hello\")", "\"olleh\"");
             TEST("(str-cat \"hello \" \"world\")", "\"hello world\"");
             TEST("(str-eq \"hello\" \"hello\")", "true");
-            ///TEST("(str-eq \"hello\" \"Æ\"", "false");  // not yet supporting UTF-8 strings
+            //TEST("(str-eq \"hello\" \"Æ\"", "false");  // not yet supporting UTF-8 strings
             TEST("(str-format \"{0} walked up {1} miles and saw {2} and {0}\" \"a bear\" 20 \"an eagle\")", "<Exception> specifier index not ordered");
             TEST("(str-format \"{0} walked up {1} miles and saw {2}\" \"a bear\" 20 \"an eagle\")", "\"a bear walked up 20 miles and saw an eagle\"");
 
-            std::cout
-                << "total tests " << g_test_count
-                << ", total failures " << g_fault_count
-                << std::endl;
+            std::cout << std::endl
+                            << "========================================" << std::endl
+                            << "Total tests " << g_test_count
+                            << ", total failure(s) " << g_fault_count
+                            << std::endl;
+
             return g_fault_count ? EXITFAILURE : EXITSUCCESS;
         }
 

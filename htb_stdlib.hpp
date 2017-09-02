@@ -9,7 +9,6 @@
 
 #include "htb_types.hpp"
 #include "htb_includes.hpp"
-#include "htb_functions.hpp"
 #include "htb_cell.hpp"
 #include "htb_internal.hpp"
 

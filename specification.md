@@ -131,8 +131,6 @@ You can access elements (or add, it is the same to Hitoban) just by using `(ns "
 
 `(isdef x)` => return `true` is `x` is defined, otherwise `false` (check in current namespace and upper only)
 
-`(call cpp_function_name args...)` => call `cpp_function_name` which should be a binded C++ function, with `args...` (as many arguments as you want, but ensure you give the correct number of arguments)
-
 ## Conditions
 
 `(if cond then alt)` `alt` is optional
@@ -181,7 +179,7 @@ You can access elements (or add, it is the same to Hitoban) just by using `(ns "
 
 `print` => print all the given arguments, separated by a single space. Ended by OS line ending
 
-`prin1` => print a single string, without adding spaces or '\n' / '\r' / '\r\n'
+`prin1` => print a single string, without adding spaces or `\n`, `\r` or `\r\n`
 
 `input` => can take an argument. If an argument is given (string only), prints it. Then asks the user to write something
 

@@ -30,12 +30,10 @@ namespace htb
             ++g_test_count;
             if (value != expected_value)
             {
-                std::cout
-                    << file << "(" << line << ") : "
-                    << " expected " << expected_value
-                    << ", got `" << value
-                    << "`, with " << litteral_val
-                    << std::endl;
+                std::cout << file << "(" << line << ") : "
+                                << log(termcolor::red,
+                                       "expected " << expected_value << ", got `" << value << "`, with " << litteral_val)
+                                << std::endl;
                 ++g_fault_count;
             }
         }
