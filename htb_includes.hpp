@@ -21,10 +21,10 @@
 #include <cstdio>
 
 #include <random>
-#include "ext_lib/fmt/format.hpp"
 #include <unordered_map>
 
 #include "ext_lib/termcolor/termcolor.hpp"
+#include "ext_lib/fmt/format.hpp"
 
 #define EXITSUCCESS 0x0
 #define EXITFAILURE 0x1

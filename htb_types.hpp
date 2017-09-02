@@ -3,15 +3,16 @@
 namespace htb
 {
 
-enum cell_type {
-    Symbol,
-    Number,
-    String,
-    List,
-    Dict,
-    Proc,
-    Lambda,
-    Exception
-};
+    enum cell_type
+    {
+        Symbol,
+        Number,
+        String,
+        List,
+        Dict,
+        Proc,
+        Lambda,
+        Exception
+    };
 
 } // namespace htb

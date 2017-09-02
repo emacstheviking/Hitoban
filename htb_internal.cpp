@@ -1,71 +1,73 @@
 #include "hitoban.hpp"
 
-namespace htb {
-
-namespace internal {
-
-cell read_htb_file(cell name, environment* baseenv, environment* ns)
+namespace htb
 {
-    RAISE_IF(name.type != String, "'require' needs strings, not " << convert_htbtype(name.type))
-    std::string content = load_htb_file(name.val, baseenv);
-    RAISE_IF(content == FILE_NOT_FOUND, "Can not find the required file '" << name.val << "'")
 
-    std::string _filename = to_string(name, true);
-    std::string _fullname = get_fullpath(name.val, baseenv);
+    namespace internal
+    {
 
-    if (ns == 0)
-    {
-        baseenv->isfile = true;
-        baseenv->fname = _fullname;
-    }
-    else
-    {
-        ns->isfile = true;
-        ns->fname = _fullname;
-    }
-
-    if (ns == 0)
-    {
-        // if lib in filename, do not add sub env, the lib is creating its own namespaces
-        if (_fullname.length() > 3 && _fullname.substr(0, 3) == "lib")
+        cell read_htb_file(cell name, environment* baseenv, environment* ns)
         {
-            HANDLE_EXCEPTION(run_string(content, baseenv))
+            RAISE_IF(name.type != String, "'require' needs strings, not " << convert_htbtype(name.type))
+            std::string content = load_htb_file(name.val, baseenv);
+            RAISE_IF(content == FILE_NOT_FOUND, "Can not find the required file '" << name.val << "'")
+
+            std::string _filename = to_string(name, true);
+            std::string _fullname = get_fullpath(name.val, baseenv);
+
+            if (ns == 0)
+            {
+                baseenv->isfile = true;
+                baseenv->fname = _fullname;
+            }
+            else
+            {
+                ns->isfile = true;
+                ns->fname = _fullname;
+            }
+
+            if (ns == 0)
+            {
+                // if lib in filename, do not add sub env, the lib is creating its own namespaces
+                if (_fullname.length() > 3 && _fullname.substr(0, 3) == "lib")
+                {
+                    HANDLE_EXCEPTION(run_string(content, baseenv))
+                }
+                else
+                {
+                    environment* sub = baseenv->get_namespace(get_filename(_filename));
+                    // use sub to run the file because it isn't a file from the lib
+                    HANDLE_EXCEPTION(run_string(content, sub))
+                }
+            }
+            else
+            {
+                HANDLE_EXCEPTION(run_string(content, ns))
+            }
+
+            return nil;
         }
-        else
+
+        std::string load_htb_file(const std::string& name, environment* baseenv)
         {
-            environment* sub = baseenv->get_namespace(get_filename(_filename));
-            // use sub to run the file because it isn't a file from the lib
-            HANDLE_EXCEPTION(run_string(content, sub))
+            std::string content = "";
+            // extend path regarding to the environment
+            std::string fullname = get_fullpath(name, baseenv);
+            // check in user code or in the lib
+            bool exists = check_if_file_exists(fullname) | check_if_file_exists(name);
+            if (exists)
+            {
+                if (name.length() > 3 && name.substr(0, 3) == "lib")
+                    content = read_file(name);
+                else
+                    content = read_file(fullname);
+            }
+            else
+                content = FILE_NOT_FOUND;
+
+            return content;
         }
-    }
-    else
-    {
-        HANDLE_EXCEPTION(run_string(content, ns))
-    }
 
-    return nil;
-}
-
-std::string load_htb_file(const std::string& name, environment* baseenv)
-{
-    std::string content = "";
-    // extend path regarding to the environment
-    std::string fullname = get_fullpath(name, baseenv);
-    // check in user code or in the lib
-    bool exists = check_if_file_exists(fullname) | check_if_file_exists(name);
-    if (exists)
-    {
-        if (name.length() > 3 && name.substr(0, 3) == "lib")
-            content = read_file(name);
-        else
-            content = read_file(fullname);
-    }
-    else
-        content = FILE_NOT_FOUND;
-
-    return content;
-}
-
-}  // namespace internal
+    }  // namespace internal
 
 }  // namespace htb

@@ -15,15 +15,15 @@ namespace htb{
 	
 	//Standard Version Type
 	static const long VER_MAJOR  = 1;
-	static const long VER_MINOR  = 7;
-	static const long VER_BUILD  = 89;
+	static const long VER_MINOR  = 8;
+	static const long VER_BUILD  = 0;
 	static const long VER_REVISION  = 551;
 	
 	//Miscellaneous Version Types
 	static const long VER_BUILDS_COUNT  = 670;
-	#define VER_RC_FILEVERSION 1,7,89,551
-	#define VER_RC_FILEVERSION_STRING "1, 7, 89, 551\0"
-	static const char VER_FULLVERSION_STRING [] = "1.7.89.551";
+	#define VER_RC_FILEVERSION 1,8,0,551
+	#define VER_RC_FILEVERSION_STRING "1, 8, 0, 551\0"
+	static const char VER_FULLVERSION_STRING [] = "1.8.0.551";
 	
 	//These values are to keep track of your versioning state, don't modify them.
 	static const long VER_BUILD_HISTORY  = 39;
