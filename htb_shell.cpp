@@ -1,3 +1,10 @@
+/*
+* Code by Folaefolc
+* A Lisp-like done just to concurrence Lisp itself (kind of crazy game for me)
+* Interpreted programming language, C++14 ; main purpose is for video games
+* License MIT
+*/
+
 #include "hitoban.hpp"
 
 ///////////////////////////////////////////////////// shell
@@ -34,8 +41,8 @@ namespace htb
             }
             else if (line == "license")
             {
-                if (check_if_file_exists("LICENSE"))
-                    std::cout << read_file("LICENSE") << std::endl;
+                if (internal::check_if_file_exists("LICENSE"))
+                    std::cout << internal::read_file("LICENSE") << std::endl;
                 else
                     std::cout << "Can not find LICENSE file. Please only download Hitoban from the official repository : https://github.com/Loodoor/Hitoban/releases" << std::endl;
             }

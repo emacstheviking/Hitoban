@@ -1,9 +1,17 @@
+/*
+* Code by Folaefolc
+* A Lisp-like done just to concurrence Lisp itself (kind of crazy game for me)
+* Interpreted programming language, C++14 ; main purpose is for video games
+* License MIT
+*/
+
 #pragma once
 
 #include "htb_types.hpp"
 #include "htb_includes.hpp"
 #include "htb_functions.hpp"
 #include "htb_cell.hpp"
+#include "htb_internal.hpp"
 
 namespace htb
 {

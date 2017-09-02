@@ -1,8 +1,10 @@
-/**
+/*
 * Code by Folaefolc
 * A Lisp-like done just to concurrence Lisp itself (kind of crazy game for me)
+* Interpreted programming language, C++14 ; main purpose is for video games
 * License MIT
 */
+
 #include "hitoban.hpp"
 
 namespace htb
@@ -10,18 +12,8 @@ namespace htb
 
     ///////////////////////////////////////////////////// constants
 
-    static bool htb_STRICT = false;
-    static bool htb_TRACKING = false;
-    const std::vector<std::regex> regexs = {
-        std::regex("^\"[^\"]*\""),                         // strings
-        std::regex("^:"),                                               // dict key symbol
-        std::regex("^[\\(\\)]"),                                      // parenthesis
-        std::regex("^((\\+|-)?[[:digit:]]+)(\\.(([[:digit:]]+)?))?((e|E)((\\+|-)?)[[:digit:]]+)?"),                  // numbers
-        std::regex("^[#@$':_!?\\-\\w]+"),                   // words
-        std::regex("^(\\+|-|\\*|/|%|<=|>=|!=|<|>|=|\\^)"),    // operators
-        std::regex("^\\s+"),                                         // whitespaces
-        std::regex("^;.*")                                            // comments
-    };
+    static bool strict_mode = false;
+    static bool tracking_mode = false;
 
     // define functions to create and modify an Hitoban environment
     void add_globals(environment& env)
@@ -32,16 +24,6 @@ namespace htb
 
         for(const auto& v : get_builtin())
             env[v.first] = v.second;
-    }
-
-    void set_strict(bool s)
-    {
-        htb_STRICT = s;
-    }
-
-    void set_tracking(bool t)
-    {
-        htb_TRACKING = t;
     }
 
     environment init_environment()
@@ -56,26 +38,29 @@ namespace htb
 
     cell eval(cell x, environment* env)
     {
-        if (htb_TRACKING)
+        if (tracking_mode)
         {
             std::string nx = to_string(x);
             std::cout << log(termcolor::cyan, "x: " << nx) << " "
-                            << log(termcolor::yellow, "[" << ((!env->has_outer()) ? "global": "ref on global")) << ", "
-                                << log(termcolor::green, ((env->isfile) ? (std::string("is a file `") + env->fname +"`") : "not a file"))
-                            << log(termcolor::yellow, "]")
+                                << log(termcolor::yellow, "[" << ((!env->has_outer()) ? "global": "ref on global")) << ", "
+                                    << log(termcolor::green, ((env->isfile) ? (std::string("is a file `") + env->fname +"`") : "not a file"))
+                                << log(termcolor::yellow, "]")
                             << std::endl;
         }
 
         // quitting if we got an exception
-        if (x.type == Exception && htb_STRICT)
+        if (x.type == Exception && strict_mode)
             throw std::runtime_error(std::string("Encountered an exception will in strict mode\n") + to_string(x));
 
+        // handling the basics use cases
         if (x.type == Symbol)
             return env->find(x.val)[x.val];
         if (x.type == Number || x.type == String)
             return x;
         if (x.list.empty())
             return nil;
+
+        // kind of macros
         if (x.list[0].val == ":")  // dict key symbol
         {
             RAISE_IF(x.list.size() < 1, "':' symbolize the beginning of a dict key, the length should be of 2, not of " << x.list.size())
@@ -90,6 +75,7 @@ namespace htb
             return exps;
         }
 
+        // language keywords interactions definitions
         if (x.list[0].type == Symbol)
         {
             if (x.list[0].val.substr(0, 1) == "#")  // (#key hashmap)
@@ -100,34 +86,34 @@ namespace htb
                 if (c.type == Dict)
                     return c.get_in(key);
                 else if (c.type == List)
-                    return c.get_in(to_long(key));
+                    return c.get_in(internal::str_to<long>(key));
                 else if (c.type == String)
                 {
-                    long n = to_long(key);
+                    long n = internal::str_to<long>(key);
                     RAISE_IF(n >= long(c.val.size()), "'#' can not get a character at pos " << n << " because it is outside the string")
                     return cell(String, std::string(1, c.val[n]));
                 }
-                RAISE("The object should be of type dict, list or string to use the # pattern, not of type " << convert_htbtype(c.type))
+                RAISE("The object should be of type dict, list or string to use the # pattern, not of type " << internal::convert_htbtype(c.type))
             }
-            if (x.list[0].val == "quote")       // (quote exp)
+            if (x.list[0].val == "quote")  // (quote exp)
                 return x.list[1];
-            if (x.list[0].val == "if")          // (if test conseq [alt])
+            if (x.list[0].val == "if")  // (if test conseq [alt])
                 return eval(eval(x.list[1], env).val == false_sym.val ? (x.list.size() < 4 ? nil : x.list[3]) : x.list[2], env);
-            if (x.list[0].val == "set!")        // (set! var exp)
+            if (x.list[0].val == "set!")  // (set! var exp)
             {
                 cell c = env->find(x.list[1].val)[x.list[1].val];
                 RAISE_IF(c.const_expr, x.list[1].val << " is a const expr, can not set its value to something else")
                 return env->find(x.list[1].val)[x.list[1].val] = eval(x.list[2], env);
             }
-            if (x.list[0].val == "def")      // (def var exp)
+            if (x.list[0].val == "def")  // (def var exp)
                 return (*env)[x.list[1].val] = eval(x.list[2], env);
-            if (x.list[0].val == "const")   // (const var exp)
+            if (x.list[0].val == "const")  // (const var exp)
             {
                 cell c = eval(x.list[2], env);
                 c.const_expr = true;
                 return (*env)[x.list[1].val] = c;
             }
-            if (x.list[0].val == "lambda")   // (lambda (var*) exp)
+            if (x.list[0].val == "lambda")  // (lambda (var*) exp)
             {
                 x.type = Lambda;
                 // keep a reference to the environment that exists now (when the
@@ -136,7 +122,7 @@ namespace htb
                 x.env = env;
                 return x;
             }
-            if (x.list[0].val == "begin")   // (begin exp*)
+            if (x.list[0].val == "begin")  // (begin exp*)
             {
                 for (unsigned int i = 1; i < x.list.size() - 1; ++i)
                 {
@@ -160,7 +146,7 @@ namespace htb
 
                 return nil;
             }
-            if (x.list[0].val == "require") // (require exp); exp as a list, a dict or a string
+            if (x.list[0].val == "require")  // (require exp); exp as a list, a dict or a string
             {
                 RAISE_IF(x.list.size() != 2, "require' takes only 1 argument, not " << x.list.size())
                 cell c = eval(x.list[1], env);
@@ -185,10 +171,12 @@ namespace htb
                     }
                 }
                 else
-                    RAISE("require' takes a dict, a list or a single string as an argument, not a " << convert_htbtype(c.type))
+                    RAISE("require' takes a dict, a list or a single string as an argument, not a " << internal::convert_htbtype(c.type))
                 return nil;
             }
+
             ///////////////////////////////////////////////////// procedures that need to use an environment (not provided in htb_stdlib because it only takes cells)
+
             if (x.list[0].val == "list-current-ns")  // (list-current-ns file)
             {
                 RAISE_IF(x.list.size() != 1, "'list-current-ns' takes only no argument")
@@ -205,7 +193,7 @@ namespace htb
             }
             if (x.list[0].val == "isdef")  // (isdef x)
             {
-                RAISE_IF(x.list[1].type != Symbol, "'isdef' needs a variable as an argument, not a " << convert_htbtype(x.list[1].type))
+                RAISE_IF(x.list[1].type != Symbol, "'isdef' needs a variable as an argument, not a " << internal::convert_htbtype(x.list[1].type))
                 return (env->find(x.list[1].val)[x.list[1].val].type != Exception) ? true_sym : false_sym;
             }
         }
@@ -239,113 +227,14 @@ namespace htb
                 exp.list.push_back(eval(*e, env));
             return exp;
         }
+
         RAISE("Not a function")
-    }
-
-    ///////////////////////////////////////////////////// parse, read and user interaction
-
-    void raise_tokenizing_error(const std::string& str, const std::string& s)
-    {
-        std::cout << "Could not tokenize correctly: " << std::endl;
-        std::vector<std::string> subs = split_string(str, "\n");
-        // take off the newline char in s
-        std::string s2;
-        s2.reserve(s.size());
-        for (unsigned int j=0; j < s.size(); j++)
-        {
-            if (s[j] != '\n' && s[j] != '\r')
-                s2 += s[j];
-        }
-
-        // print each line while it does not contain the error
-        // then print a well placed "^" to indicate what could not be tokenized
-        for (auto& element: subs)
-        {
-            std::cout << element << std::endl;
-
-            std::string::size_type p = element.find(s2);
-            if (p != std::string::npos)
-            {
-                // we found the line where the error is at
-                for (std::string::size_type i=0; i < p; i++) std::cout << " ";
-                std::cout << "^" << std::endl;
-                break;
-            }
-        }
-        throw std::runtime_error("Tokenizing failed");
-    }
-
-    // convert given string to list of tokens
-    std::list<std::string> tokenize(const std::string& str)
-    {
-        std::string s = str;
-        std::list<std::string> tokens;
-
-        while (!s.empty())
-        {
-            bool ok = false;
-
-            for (const auto& r : regexs)
-            {
-                std::smatch m;
-                if (std::regex_search(s, m, r))
-                {
-                    std::string m0(m[0]);
-                    if (std::string::npos != m0.find_first_not_of(" \t\v\r\n") && m0.substr(0, 1) != ";")
-                        tokens.push_back(m[0]);
-                    s = std::regex_replace(s, r, std::string(""), std::regex_constants::format_first_only);
-                    ok = true;
-                    break;
-                }
-            }
-            if (!ok)
-            {
-                raise_tokenizing_error(str, s);
-                break;
-            }
-        }
-
-        return tokens;
-    }
-
-    // numbers become Numbers; every other token is a Symbol
-    cell atom(const std::string& token)
-    {
-        if (isdig(token[0]) || (token[0] == '-' && isdig(token[1])))
-            return cell(Number, token);
-        if (token.substr(0, 1) == "\"" || token.substr(0, 1) == "'")
-            return cell(String, token.substr(1, token.size() - 2));
-        return cell(Symbol, token);
-    }
-
-    // return the Hitoban expression in the given tokens
-    cell read_from(std::list<std::string>& tokens)
-    {
-        const std::string token(tokens.front());
-        tokens.pop_front();
-        if (token == "(")
-        {
-            cell c(List);
-            while (tokens.front() != ")")
-                c.list.push_back(read_from(tokens));
-            tokens.pop_front();
-            return c;
-        }
-        else
-            return atom(token);
-    }
-
-    // return the Hitoban expression represented by the given string
-    cell read(const std::string& s)
-    {
-        std::list<std::string> tokens(tokenize(s));
-        return read_from(tokens);
     }
 
     // execute a string of Hitoban code, in a given environment
     cell run_string(const std::string& code, environment* env)
     {
-        cell result = eval(read(code), env);
+        cell result = eval(internal::read(code), env);
         return result;
     }
 
@@ -390,9 +279,10 @@ int main(int argc, char *argv[])
         }
         if (input == "-w")  // strict mode
         {
-            htb::set_strict(true);
+            htb::strict_mode = true;
 
-            if (argc >= c + 2) input = argv[++c];
+            if (argc >= c + 2)
+                input = argv[++c];
             else
             {
                 start_repl();  // we do not have other arguments, start a repl
@@ -401,9 +291,10 @@ int main(int argc, char *argv[])
         }
         if (input == "-t")  // tracking mode
         {
-            htb::set_tracking(true);
+            htb::tracking_mode = true;
 
-            if (argc >= c + 2) input = argv[++c];
+            if (argc >= c + 2)
+                input = argv[++c];
             else
             {
                 start_repl();  // we do not have other arguments, start a repl
@@ -416,12 +307,12 @@ int main(int argc, char *argv[])
             return EXITSUCCESS;
         }
         if (input == "tests")  // running the tests
-            return htb::tests();
+            return htb::tests::tests();
 
         // if we are here, we have a filename passed as an argument
-        if (htb::check_if_file_exists(input))
+        if (htb::internal::check_if_file_exists(input))
         {
-            std::string content = htb::read_file(input);
+            std::string content = htb::internal::read_file(input);
 
             // setting up environment
             htb::environment global_env;

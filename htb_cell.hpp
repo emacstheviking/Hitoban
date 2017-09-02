@@ -1,8 +1,15 @@
+/*
+* Code by Folaefolc
+* A Lisp-like done just to concurrence Lisp itself (kind of crazy game for me)
+* Interpreted programming language, C++14 ; main purpose is for video games
+* License MIT
+*/
+
 #pragma once
 
 #include "htb_types.hpp"
 #include "htb_includes.hpp"
-#include "htb_functions.hpp"
+#include "htb_internal.hpp"
 
 namespace htb
 {
@@ -31,12 +38,15 @@ namespace htb
             , env(0)
             , const_expr(false)
         {}
-        cell(cell_type type, const std::string& val) :
+
+        template <typename T>
+        cell(cell_type type, T val) :
             type(type)
-            , val(val)
+            , val(internal::str<T>(val))
             , env(0)
             , const_expr(false)
         {}
+
         cell(proc_type proc) :
             type(Proc)
             , proc(proc)
@@ -44,17 +54,30 @@ namespace htb
             , const_expr(false)
         {}
 
+        cell(const cell& c) :
+            type(c.type)
+            , val(c.val)
+            , list(c.list)
+            , dict(c.dict)
+            , proc(c.proc)
+            , env(c.env)
+            , const_expr(c.const_expr)
+        {}
+
         cell get_in(const std::string& key)
         {
             RAISE_IF(type != Dict, "Can not access a sub element because the object is not a dict")
             RAISE_IF(dict.empty(), "Can not access an element with the key " << key << " because the dict is empty")
             RAISE_IF(dict.find(key) == dict.end(), "Can not find the key " << key << " in the dict")
+
             return dict[key];
         }
+
         cell get_in(long n)
         {
             RAISE_IF(type != List, "Can not access a sub element because the object is not a list")
             RAISE_IF(n >= long(list.size()), "Can not find the " << n << "th element in the list")
+
             return list[n];
         }
 
@@ -65,7 +88,7 @@ namespace htb
 
         bool operator!=(const cell& r) const
         {
-            return ! (r == *this);
+            return !(r == *this);
         }
     };  // struct cell
 
@@ -81,9 +104,11 @@ namespace htb
     // a dictionary that (a) associates symbols with cells, and
     // (b) can chain to an "outer" dictionary
     struct environment {
+        // map a variable name onto a cell
+        typedef std::map<std::string, cell> map;
+
         bool isfile;
         std::string fname;
-        environment* outer_; // next adjacent outer env, or 0 if there are no further environments
 
         environment(environment* outer=0) :
             isfile(false)
@@ -101,9 +126,6 @@ namespace htb
             }
         }
 
-        // map a variable name onto a cell
-        typedef std::map<std::string, cell> map;
-
         // return a reference to the innermost environment where 'var' appears
         map& find(const std::string& var)
         {
@@ -114,6 +136,7 @@ namespace htb
 
             std::stringstream ss; ss << "Unbound symbol '" << var << "'";
             errors[var] = cell(Exception, ss.str());
+
             return errors;
         }
 
@@ -185,6 +208,7 @@ namespace htb
         }
 
     private:
+        environment* outer_; // next adjacent outer env, or 0 if there are no further environments
         map env_; // inner symbol->cell mapping
         map errors;
         std::map<std::string, environment*> namespaces;

@@ -1,3 +1,10 @@
+/*
+* Code by Folaefolc
+* A Lisp-like done just to concurrence Lisp itself (kind of crazy game for me)
+* Interpreted programming language, C++14 ; main purpose is for video games
+* License MIT
+*/
+
 #include "htb_stdlib.hpp"
 
 namespace htb
@@ -7,35 +14,35 @@ namespace htb
     {
         RAISE_IF(c.size() < 2, "'add' needs at least two arguments")
         HANDLE_EXCEPTION(c[0])
-        long n = to_long(c[0].val);
+        long n = internal::str_to<long>(c[0].val);
         for (cellit i = c.begin()+1; i != c.end(); ++i)
         {
             HANDLE_EXCEPTION((*i))
             RAISE_IF(i->type != Number, "Not a number : " << i->val)
-            n += to_long(i->val);
+            n += internal::str_to<long>(i->val);
         }
 
-        return cell(Number, str(n));
+        return cell(Number, internal::str(n));
     }
 
     cell proc_sub(const cells& c)
     {
         RAISE_IF(c.size() < 1, "'sub' needs at least one argument")
         HANDLE_EXCEPTION(c[0])
-        long n = to_long(c[0].val);
+        long n = internal::str_to<long>(c[0].val);
         if (c.size() > 1)
         {
             for (cellit i = c.begin()+1; i != c.end(); ++i)
             {
                 HANDLE_EXCEPTION((*i))
                 RAISE_IF(i->type != Number, "Not a number : " << i->val)
-                n -= to_long(i->val);
+                n -= internal::str_to<long>(i->val);
             }
         }
         else
             n = -n;
 
-        return cell(Number, str(n));
+        return cell(Number, internal::str(n));
     }
 
     cell proc_mul(const cells& c)
@@ -46,25 +53,25 @@ namespace htb
         {
             HANDLE_EXCEPTION((*i))
             RAISE_IF(i->type != Number, "Not a number : " << i->val)
-            n *= to_long(i->val);
+            n *= internal::str_to<long>(i->val);
         }
 
-        return cell(Number, str(n));
+        return cell(Number, internal::str(n));
     }
 
     cell proc_div(const cells& c)
     {
         RAISE_IF(c.size() < 2, "'div' needs at least two arguments")
         HANDLE_EXCEPTION(c[0])
-        long n = to_long(c[0].val);
+        long n = internal::str_to<long>(c[0].val);
         for (cellit i = c.begin()+1; i != c.end(); ++i)
         {
             HANDLE_EXCEPTION((*i))
             RAISE_IF(i->type != Number, "Not a number : " << i->val)
-            n /= to_long(i->val);
+            n /= internal::str_to<long>(i->val);
         }
 
-        return cell(Number, str(n));
+        return cell(Number, internal::str(n));
     }
 
     cell proc_and(const cells& c)
@@ -96,7 +103,7 @@ namespace htb
         RAISE_IF(c.size() != 2, "'pow' needs only two arguments")
         HANDLE_EXCEPTION(c[0])
         HANDLE_EXCEPTION(c[1])
-        return cell(Number, str(std::pow(to_long(c[0].val), to_long(c[1].val))));
+        return cell(Number, internal::str(std::pow(internal::str_to<long>(c[0].val), internal::str_to<long>(c[1].val))));
     }
 
     cell proc_modulo(const cells& c)
@@ -104,19 +111,19 @@ namespace htb
         RAISE_IF(c.size() != 2, "'modulo' needs only two arguments")
         HANDLE_EXCEPTION(c[0])
         HANDLE_EXCEPTION(c[1])
-        return cell(Number, str(to_long(c[0].val) % to_long(c[1].val)));
+        return cell(Number, internal::str(internal::str_to<long>(c[0].val) % internal::str_to<long>(c[1].val)));
     }
 
     cell proc_greater(const cells& c)
     {
         RAISE_IF(c.size() < 2, "'gt' needs at least two arguments")
         HANDLE_EXCEPTION(c[0])
-        long n = to_long(c[0].val);
+        long n = internal::str_to<long>(c[0].val);
         for (cellit i = c.begin()+1; i != c.end(); ++i)
         {
             HANDLE_EXCEPTION((*i))
             RAISE_IF(i->type != Number, "Not a number : " << i->val)
-            if (n <= to_long(i->val))
+            if (n <= internal::str_to<long>(i->val))
                 return false_sym;
         }
         return true_sym;
@@ -126,12 +133,12 @@ namespace htb
     {
         RAISE_IF(c.size() < 2, "'ge' needs at least two arguments")
         HANDLE_EXCEPTION(c[0])
-        long n = to_long(c[0].val);
+        long n = internal::str_to<long>(c[0].val);
         for (cellit i = c.begin()+1; i != c.end(); ++i)
         {
             HANDLE_EXCEPTION((*i))
             RAISE_IF(i->type != Number, "Not a number : " << i->val)
-            if (n < to_long(i->val))
+            if (n < internal::str_to<long>(i->val))
                 return false_sym;
         }
         return true_sym;
@@ -141,12 +148,12 @@ namespace htb
     {
         RAISE_IF(c.size() < 2, "'lt' needs at least two arguments")
         HANDLE_EXCEPTION(c[0])
-        long n = to_long(c[0].val);
+        long n = internal::str_to<long>(c[0].val);
         for (cellit i = c.begin()+1; i != c.end(); ++i)
         {
             HANDLE_EXCEPTION((*i))
             RAISE_IF(i->type != Number, "Not a number : " << i->val)
-            if (n >= to_long(i->val))
+            if (n >= internal::str_to<long>(i->val))
                 return false_sym;
         }
         return true_sym;
@@ -156,12 +163,12 @@ namespace htb
     {
         RAISE_IF(c.size() < 2, "'le' needs at least two arguments")
         HANDLE_EXCEPTION(c[0])
-        long n = to_long(c[0].val);
+        long n = internal::str_to<long>(c[0].val);
         for (cellit i = c.begin()+1; i != c.end(); ++i)
         {
             HANDLE_EXCEPTION((*i))
             RAISE_IF(i->type != Number, "Not a number : " << i->val)
-            if (n > to_long(i->val))
+            if (n > internal::str_to<long>(i->val))
                 return false_sym;
         }
         return true_sym;
@@ -171,12 +178,12 @@ namespace htb
     {
         RAISE_IF(c.size() < 2, "'eq' needs at least two arguments")
         HANDLE_EXCEPTION(c[0])
-        long n = to_long(c[0].val);
+        long n = internal::str_to<long>(c[0].val);
         for (cellit i = c.begin()+1; i != c.end(); ++i)
         {
             HANDLE_EXCEPTION((*i))
             RAISE_IF(i->type != Number, "Not a number : " << i->val)
-            long b = to_long(i->val);
+            long b = internal::str_to<long>(i->val);
             if (n < b || n > b)
                 return false_sym;
         }
@@ -211,8 +218,8 @@ namespace htb
         RAISE_IF(c.size() != 1, "'length' needs only one argument")
         HANDLE_EXCEPTION(c[0])
         if (c[0].type == String)
-            return cell(Number, str(c[0].val.size()));
-        return cell(Number, str(c[0].list.size()));
+            return cell(Number, internal::str(c[0].val.size()));
+        return cell(Number, internal::str(c[0].list.size()));
     }
 
     cell proc_nullp(const cells& c)
@@ -293,7 +300,7 @@ namespace htb
         HANDLE_EXCEPTION(c[1])
         if (c[1].type == List)
         {
-            long n = to_long(c[0].val);
+            long n = internal::str_to<long>(c[0].val);
             cell tmp = c[1];
             const cell temp = tmp.get_in(n);
 
@@ -304,7 +311,7 @@ namespace htb
         else if (c[1].type == Dict)
         {
             cell tmp = c[1];
-            RAISE_IF(c[0].type != String, "Keys in dict are of type string, not of type " << convert_htbtype(c[0].type))
+            RAISE_IF(c[0].type != String, "Keys in dict are of type string, not of type " << internal::convert_htbtype(c[0].type))
             const cell temp = tmp.get_in(c[0].val);
 
             COPY(temp, result)
@@ -313,12 +320,12 @@ namespace htb
         }
         else if (c[1].type == String)
         {
-            long n = to_long(c[0].val);
+            long n = internal::str_to<long>(c[0].val);
             RAISE_IF(n >= long(c[1].val.size()), "'nth' can not get a character at pos " << n << " because it is outside the string")
             return cell(String, std::string(1, c[1].val[n]));
         }
         // we should not be there
-        RAISE("The object should be of type list, dict or string, not of type " << convert_htbtype(c[1].type))
+        RAISE("The object should be of type list, dict or string, not of type " << internal::convert_htbtype(c[1].type))
     }
 
     cell proc_dict(const cells& c)
@@ -330,9 +337,9 @@ namespace htb
             HANDLE_EXCEPTION(c[i])
             COPY(c[i], temp)
 
-            RAISE_IF(temp.type != List, "Arguments of 'dict' should be of type list, not of type " << convert_htbtype(temp.type))
+            RAISE_IF(temp.type != List, "Arguments of 'dict' should be of type list, not of type " << internal::convert_htbtype(temp.type))
             HANDLE_EXCEPTION(temp.list[0])
-            RAISE_IF(temp.list[0].type != String, "Keys for 'dict' should only be of type string, not of type " << convert_htbtype(temp.list[0].type))
+            RAISE_IF(temp.list[0].type != String, "Keys for 'dict' should only be of type string, not of type " << internal::convert_htbtype(temp.list[0].type))
             std::string key(temp.list[0].val);
             RAISE_IF(temp.list.size() > 2,"Lists to define (key value) in dict should not be of size " << temp.list.size())  // we have more than 2 elements, not normal
             COPY(temp.list[1], v)
@@ -346,7 +353,7 @@ namespace htb
     {
         RAISE_IF(c.size() != 1, "'keys' needs only one argument : an object of type dict")
         HANDLE_EXCEPTION(c[0])
-        RAISE_IF(c[0].type != Dict, "'keys' argument's should be of type dict, not of type " << convert_htbtype(c[0].type))
+        RAISE_IF(c[0].type != Dict, "'keys' argument's should be of type dict, not of type " << internal::convert_htbtype(c[0].type))
         cell result(List);
 
         for (auto kv: c[0].dict)
@@ -364,7 +371,7 @@ namespace htb
     {
         RAISE_IF(c.size() != 1, "'values' needs only one argument : an object of type dict")
         HANDLE_EXCEPTION(c[0])
-        RAISE_IF(c[0].type != Dict, "'values' argument's should be of type dict, not of type " << convert_htbtype(c[0].type))
+        RAISE_IF(c[0].type != Dict, "'values' argument's should be of type dict, not of type " << internal::convert_htbtype(c[0].type))
         cell result(List);
 
         for (auto kv: c[0].dict)
@@ -391,7 +398,7 @@ namespace htb
     {
         RAISE_IF(c.size() != 1, "'prin1' needs only one argument")
         HANDLE_EXCEPTION(c[0])
-        RAISE_IF(c[0].type != String, "'prin1' argument's should be of type string, not of type " << convert_htbtype(c[0].type))
+        RAISE_IF(c[0].type != String, "'prin1' argument's should be of type string, not of type " << internal::convert_htbtype(c[0].type))
         std::cout << c[0].val;
         return nil;
     }
@@ -421,20 +428,20 @@ namespace htb
     {
         RAISE_IF(c.size() != 1, "'system' needs only one argument")
         HANDLE_EXCEPTION(c[0])
-        RAISE_IF(c[0].type != String, "'system' argument's should of type string, not of type " << convert_htbtype(c[0].type))
+        RAISE_IF(c[0].type != String, "'system' argument's should of type string, not of type " << internal::convert_htbtype(c[0].type))
 
-        return cell(Number, str(system(c[0].val.c_str())));
+        return cell(Number, internal::str(system(c[0].val.c_str())));
     }
 
     cell proc_str_eq(const cells& c)
     {
         RAISE_IF(c.size() < 2, "'str-eq' needs at least two arguments")
-        RAISE_IF(c[0].type != String, "'str-eq' arguments' should be of type string, not of type " << convert_htbtype(c[0].type))
+        RAISE_IF(c[0].type != String, "'str-eq' arguments' should be of type string, not of type " << internal::convert_htbtype(c[0].type))
         std::string f = c[0].val;
         for (unsigned int i = 1; i < c.size(); ++i)
         {
             HANDLE_EXCEPTION(c[i])
-            RAISE_IF(c[i].type != String, "'str-eq' arguments' should be of type string, not of type " << convert_htbtype(c[i].type))
+            RAISE_IF(c[i].type != String, "'str-eq' arguments' should be of type string, not of type " << internal::convert_htbtype(c[i].type))
             if (c[i].val != f)
                 return false_sym;
         }
@@ -445,12 +452,12 @@ namespace htb
     {
         RAISE_IF(c.size() < 2, "'str-cat' needs at least two arguments")
         HANDLE_EXCEPTION(c[0])
-        RAISE_IF(c[0].type != String, "'str-cat' arguments' should be of type string, not of type " << convert_htbtype(c[0].type))
+        RAISE_IF(c[0].type != String, "'str-cat' arguments' should be of type string, not of type " << internal::convert_htbtype(c[0].type))
         std::string f = c[0].val;
         for (unsigned int i = 1; i < c.size(); ++i)
         {
             HANDLE_EXCEPTION(c[i])
-            RAISE_IF(c[i].type != String, "'str-cat' arguments' should be of type string, not of type " << convert_htbtype(c[i].type))
+            RAISE_IF(c[i].type != String, "'str-cat' arguments' should be of type string, not of type " << internal::convert_htbtype(c[i].type))
             f += c[i].val;
         }
         return cell(String, f);
@@ -460,7 +467,7 @@ namespace htb
     {
         RAISE_IF(c.size() != 1, "'str-reverse' needs only one argument")
         HANDLE_EXCEPTION(c[0])
-        RAISE_IF(c[0].type != String, "'str-reverse' argument's should be of type string, not of type " << convert_htbtype(c[0].type))
+        RAISE_IF(c[0].type != String, "'str-reverse' argument's should be of type string, not of type " << internal::convert_htbtype(c[0].type))
         std::string s = c[0].val;
         std::reverse(s.begin(), s.end());
         return cell(String, s);
@@ -471,7 +478,7 @@ namespace htb
         // see https://github.com/ryjen/format for the syntax of the format engine
         RAISE_IF(c.size() < 2, "'str-format' needs at least 2 arguments")
         HANDLE_EXCEPTION(c[0])
-        RAISE_IF(c[0].type != String, "'str-format' first argument should be of type string, not of type " << convert_htbtype(c[0].type))
+        RAISE_IF(c[0].type != String, "'str-format' first argument should be of type string, not of type " << internal::convert_htbtype(c[0].type))
 
         try
         {
@@ -479,9 +486,10 @@ namespace htb
             for (unsigned int i = 1; i < c.size(); ++i)
             {
                 HANDLE_EXCEPTION(c[i])
-                RAISE_IF(c[i].type != String && c[i].type != Number, "'str-format' arguments' should be of type string, not of type " << convert_htbtype(c[i].type))
+                RAISE_IF(c[i].type != String && c[i].type != Number,
+                         "'str-format' arguments' should be of type string, not of type " << internal::convert_htbtype(c[i].type))
                 if (c[i].type == Number)
-                    f.args(to_long(c[i].val));
+                    f.args(internal::str_to<long>(c[i].val));
                 else
                     f.args(c[i].val);
             }
@@ -500,7 +508,7 @@ namespace htb
     cell proc_typeof(const cells& c)
     {
         RAISE_IF(c.size() != 1, "'typeof' needs only one argument")
-        return cell(String, convert_htbtype(c[0].type));
+        return cell(String, internal::convert_htbtype(c[0].type));
     }
 
     cell proc_random(const cells& c)
@@ -516,20 +524,20 @@ namespace htb
         else if (c.size() == 1)
         {
             HANDLE_EXCEPTION(c[0])
-            RAISE_IF(c[0].type != Number, "'random' arguments' should be of type number, not of type " << convert_htbtype(c[0].type))
-            std::uniform_int_distribution<> d(0, to_long(c[0].val));
+            RAISE_IF(c[0].type != Number, "'random' arguments' should be of type number, not of type " << internal::convert_htbtype(c[0].type))
+            std::uniform_int_distribution<> d(0, internal::str_to<long>(c[0].val));
             n = d(gen);
         }
         else
         {
             HANDLE_EXCEPTION(c[0])
-            RAISE_IF(c[0].type != Number, "'random' arguments' should be of type number, not of type " << convert_htbtype(c[0].type))
+            RAISE_IF(c[0].type != Number, "'random' arguments' should be of type number, not of type " << internal::convert_htbtype(c[0].type))
             HANDLE_EXCEPTION(c[1])
-            RAISE_IF(c[1].type != Number, "'random' arguments' should be of type number, not of type " << convert_htbtype(c[1].type))
-            std::uniform_int_distribution<> d(to_long(c[0].val), to_long(c[1].val));
+            RAISE_IF(c[1].type != Number, "'random' arguments' should be of type number, not of type " << internal::convert_htbtype(c[1].type))
+            std::uniform_int_distribution<> d(internal::str_to<long>(c[0].val), internal::str_to<long>(c[1].val));
             n = d(gen);
         }
-        return cell(Number, str(n));
+        return cell(Number, internal::str(n));
     }
 
     ///////////////////////////////////////////////////// built-in functions

@@ -1,3 +1,10 @@
+/*
+* Code by Folaefolc
+* A Lisp-like done just to concurrence Lisp itself (kind of crazy game for me)
+* Interpreted programming language, C++14 ; main purpose is for video games
+* License MIT
+*/
+
 #pragma once
 
 #include <iostream>
@@ -34,12 +41,11 @@
 #define RAISE(msg) {std::stringstream ss; ss << msg; return cell(Exception, ss.str());}
 #define RAISE_IF(cd, msg) if (cd) { RAISE(msg) }
 #define COPY(base, dest) cell dest(base.type); \
-        if (dest.type == List) \
-            dest.list = base.list; \
-        else if (dest.type == Dict) \
-            dest.dict = base.dict; \
-        else \
-            dest.val = base.val;
+        if (dest.type == List)  dest.list = base.list; \
+        else if (dest.type == Dict)  dest.dict = base.dict; \
+        else if (dest.type == Proc) dest.proc = base.proc; \
+        else  dest.val = base.val; \
+        dest.env = base.env;
 #define HANDLE_EXCEPTION(c) { if (c.type == Exception) return c; }
 #define FILE_NOT_FOUND std::string("<file not found>")
 
