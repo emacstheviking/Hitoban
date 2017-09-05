@@ -38,14 +38,17 @@
 
 #define log(color, msg)  color << msg << termcolor::reset
 
-#define RAISE(msg) {std::stringstream ss; ss << msg; return cell(Exception, ss.str());}
-#define RAISE_IF(cd, msg) if (cd) { RAISE(msg) }
-#define COPY(base, dest) cell dest(base.type); \
+#define HTB_RAISE(msg) {std::stringstream ss; ss << msg; return cell(Exception, ss.str());}
+#define HTB_RAISE_IF(cd, msg) if (cd) { HTB_RAISE(msg) }
+#define HTB_HANDLE_EXCEPTION(c) { if (c.type == Exception) return c; }
+#define HTB_COPY(base, dest) cell dest(base.type); \
         if (dest.type == List)  dest.list = base.list; \
         else if (dest.type == Dict)  dest.dict = base.dict; \
         else if (dest.type == Proc) dest.proc = base.proc; \
         else  dest.val = base.val; \
-        dest.env = base.env;
-#define HANDLE_EXCEPTION(c) { if (c.type == Exception) return c; }
-#define FILE_NOT_FOUND std::string("<file not found>")
+        dest.env = base.env; \
+        dest.const_expr = base.const_expr; \
+        dest.number_of_args = base.number_of_args;
+
+#define HTB_FILE_NOT_FOUND std::string("<file not found>")
 

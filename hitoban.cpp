@@ -63,7 +63,7 @@ namespace htb
         // kind of macros
         if (x.list[0].val == ":")  // dict key symbol
         {
-            RAISE_IF(x.list.size() < 1, "':' symbolize the beginning of a dict key, the length should be of 2, not of " << x.list.size())
+            HTB_RAISE_IF(x.list.size() < 1, "':' symbolize the beginning of a dict key, the length should be of 2, not of " << x.list.size())
 
             cell exps;
             exps.type = List;
@@ -81,7 +81,7 @@ namespace htb
             if (x.list[0].val.substr(0, 1) == "#")  // (#key hashmap)
             {
                 std::string key = x.list[0].val.substr(1);
-                RAISE_IF(key.empty(), x.list[0].val << " is not a valid key (length must be > 0)")
+                HTB_RAISE_IF(key.empty(), x.list[0].val << " is not a valid key (length must be > 0)")
                 cell c(eval(x.list[1], env));
                 if (c.type == Dict)
                     return c.get_in(key);
@@ -90,10 +90,10 @@ namespace htb
                 else if (c.type == String)
                 {
                     long n = internal::str_to<long>(key);
-                    RAISE_IF(n >= long(c.val.size()), "'#' can not get a character at pos " << n << " because it is outside the string")
+                    HTB_RAISE_IF(n >= long(c.val.size()), "'#' can not get a character at pos " << n << " because it is outside the string")
                     return cell(String, std::string(1, c.val[n]));
                 }
-                RAISE("The object should be of type dict, list or string to use the # pattern, not of type " << internal::convert_htbtype(c.type))
+                HTB_RAISE("The object should be of type dict, list or string to use the # pattern, not of type " << internal::convert_htbtype(c.type))
             }
             if (x.list[0].val == "quote")  // (quote exp)
                 return x.list[1];
@@ -102,7 +102,7 @@ namespace htb
             if (x.list[0].val == "set!")  // (set! var exp)
             {
                 cell c = env->find(x.list[1].val)[x.list[1].val];
-                RAISE_IF(c.const_expr, x.list[1].val << " is a const expr, can not set its value to something else")
+                HTB_RAISE_IF(c.const_expr, x.list[1].val << " is a const expr, can not set its value to something else")
                 return env->find(x.list[1].val)[x.list[1].val] = eval(x.list[2], env);
             }
             if (x.list[0].val == "def")  // (def var exp)
@@ -127,51 +127,51 @@ namespace htb
                 for (unsigned int i = 1; i < x.list.size() - 1; ++i)
                 {
                     cell c = eval(x.list[i], env);
-                    HANDLE_EXCEPTION(c)
+                    HTB_HANDLE_EXCEPTION(c)
                 }
                 return eval(x.list[x.list.size() - 1], env);
             }
             if (x.list[0].val == "ns")  // (ns "name" ...)
             {
-                RAISE_IF(x.list.size() < 2, "'ns' needs at least one argument 'name' (string)")
-                HANDLE_EXCEPTION(x.list[1])
+                HTB_RAISE_IF(x.list.size() < 2, "'ns' needs at least one argument 'name' (string)")
+                HTB_HANDLE_EXCEPTION(x.list[1])
                 environment* sub = env->get_namespace(x.list[1].val);
 
                 if (x.list.size() > 2)
                     for (unsigned int i = 2; i < x.list.size(); ++i)
                     {
                         cell c = eval(x.list[i], sub);
-                        HANDLE_EXCEPTION(c)
+                        HTB_HANDLE_EXCEPTION(c)
                     }
 
                 return nil;
             }
             if (x.list[0].val == "require")  // (require exp); exp as a list, a dict or a string
             {
-                RAISE_IF(x.list.size() != 2, "require' takes only 1 argument, not " << x.list.size())
+                HTB_RAISE_IF(x.list.size() != 2, "require' takes only 1 argument, not " << x.list.size())
                 cell c = eval(x.list[1], env);
 
                 if (c.type == List)
                 {
                     for (cellit i = c.list.begin(); i != c.list.end(); i++)
                     {
-                        HANDLE_EXCEPTION(internal::read_htb_file((*i), env))
+                        HTB_HANDLE_EXCEPTION(internal::read_htb_file((*i), env))
                     }
                 }
                 else if (c.type == String)
                 {
-                    HANDLE_EXCEPTION(internal::read_htb_file(c, env))
+                    HTB_HANDLE_EXCEPTION(internal::read_htb_file(c, env))
                 }
                 else if (c.type == Dict)
                 {
                     for (auto kv: c.dict)
                     {
                         environment* sub = env->get_namespace(kv.first);
-                        HANDLE_EXCEPTION(internal::read_htb_file(kv.second, env, sub))
+                        HTB_HANDLE_EXCEPTION(internal::read_htb_file(kv.second, env, sub))
                     }
                 }
                 else
-                    RAISE("require' takes a dict, a list or a single string as an argument, not a " << internal::convert_htbtype(c.type))
+                    HTB_RAISE("require' takes a dict, a list or a single string as an argument, not a " << internal::convert_htbtype(c.type))
                 return nil;
             }
 
@@ -179,7 +179,7 @@ namespace htb
 
             if (x.list[0].val == "list-current-ns")  // (list-current-ns file)
             {
-                RAISE_IF(x.list.size() != 1, "'list-current-ns' takes only no argument")
+                HTB_RAISE_IF(x.list.size() != 1, "'list-current-ns' takes only no argument")
                 cell output(List);
                 for (auto name : env->get_namespaces())
                     output.list.push_back(cell(String, name));
@@ -187,13 +187,13 @@ namespace htb
             }
             if (x.list[0].val == "get-opened-file")  // (get-opened-file)
             {
-                RAISE_IF(x.list.size() != 1, "'get-opened-file' takes no argument")
+                HTB_RAISE_IF(x.list.size() != 1, "'get-opened-file' takes no argument")
                 std::string fname = env->get_parent_file();
                 return cell(String, fname);
             }
             if (x.list[0].val == "isdef")  // (isdef x)
             {
-                RAISE_IF(x.list[1].type != Symbol, "'isdef' needs a variable as an argument, not a " << internal::convert_htbtype(x.list[1].type))
+                HTB_RAISE_IF(x.list[1].type != Symbol, "'isdef' needs a variable as an argument, not a " << internal::convert_htbtype(x.list[1].type))
                 return (env->find(x.list[1].val)[x.list[1].val].type != Exception) ? true_sym : false_sym;
             }
         }
@@ -212,11 +212,18 @@ namespace htb
             // *Although the environment existed at the time the lambda was defined
             // it wasn't necessarily complete - it may have subsequently had
             // more symbols defined in that environment.
-            //                  body                                           params              args
-            return eval(proc.list[2], new environment(proc.list[1].list, exps, proc.env));
+            try
+            {
+                //                  body                                           params              args
+                return eval(proc.list[2], new environment(proc.list[1].list, exps, proc.env));
+            }
+            catch (const std::runtime_error& e)
+            {
+                HTB_RAISE(e.what())
+            }
         }
         else if (proc.type == Proc)
-            return proc.proc(exps);
+            return proc.exec(exps, x.list[0].val);
         // we have something like
         // (... (thing other ...))
         // and we are trying to parse "thing" alone
@@ -228,7 +235,7 @@ namespace htb
             return exp;
         }
 
-        RAISE("Not a function")
+        HTB_RAISE("Not a function")
     }
 
     // execute a string of Hitoban code, in a given environment
@@ -238,7 +245,25 @@ namespace htb
         return result;
     }
 
+    cell create_function(proc_type p, int n)
+    {
+        return cell(p, n);
+    }
+
 } // namespace htb
+
+htb::types::ret mon_test(htb::types::args args)
+{
+    // checking the size of the arguments
+    if (args.size() < 1)
+        return htb::cell(htb::Exception, "Need more arguments !");  // that's how we build an exception in Hitoban
+    // check if the argument is an exception, if so, end function call
+    if (args[0].type == htb::Exception) return args[0];
+    // body of the function
+    std::cout << "working" << std::endl;
+    // returning a valid htb::cell
+    return args[0];
+}
 
 int start_repl()
 {
@@ -248,6 +273,8 @@ int start_repl()
 
     htb::environment global_env;
     htb::add_globals(global_env);
+    // fct name in htb            ;  create the function  (ptr on fct, number of arguments)
+    global_env["mon_test"] = htb::create_function(&mon_test, 1);
     htb::repl("> ", &global_env);
 
     return EXITSUCCESS;

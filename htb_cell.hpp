@@ -14,14 +14,24 @@
 namespace htb
 {
 
+    constexpr long INF_NB_ARGS  = -1;
+    constexpr long AT_LEAST_1_ARGS  = -2;
+    constexpr long AT_LEAST_2_ARGS  = -3;
+    constexpr long BETWEEN_0_1_ARGS = -4;
+    constexpr long BETWEEN_0_2_ARGS = -5;
+
     ///////////////////////////////////////////////////// cell
 
     struct environment; // forward declaration; cell and environment reference each other
+    struct cell;
+
+    typedef cell (*proc_type)(const std::vector<cell>&);
+    typedef std::vector<cell> cells;
+    typedef cells::const_iterator cellit;
 
     // a variant that can hold any kind of Hitoban value
     struct cell
     {
-        typedef cell (*proc_type)(const std::vector<cell>&);
         typedef std::vector<cell>::const_iterator iter;
         typedef std::map<std::string, cell> map;
 
@@ -32,11 +42,13 @@ namespace htb
         proc_type proc;
         environment* env;
         bool const_expr;
+        long number_of_args;
 
         cell(cell_type type=Symbol) :
             type(type)
             , env(0)
             , const_expr(false)
+            , number_of_args(0)
         {}
 
         template <typename T>
@@ -45,13 +57,15 @@ namespace htb
             , val(internal::str<T>(val))
             , env(0)
             , const_expr(false)
+            , number_of_args(0)
         {}
 
-        cell(proc_type proc) :
+        cell(proc_type proc, long n=0) :
             type(Proc)
             , proc(proc)
             , env(0)
             , const_expr(false)
+            , number_of_args(n)
         {}
 
         cell(const cell& c) :
@@ -62,21 +76,52 @@ namespace htb
             , proc(c.proc)
             , env(c.env)
             , const_expr(c.const_expr)
+            , number_of_args(c.number_of_args)
         {}
+
+        void init_from(cell* c)
+        {
+            type = c->type;
+            val = c->val;
+            list = c->list;
+            dict = c->dict;
+            proc = c->proc;
+            env = c->env;
+            const_expr = c->const_expr;
+            number_of_args = c->number_of_args;
+        }
+
+        cell exec(const cells& c, const std::string& name)
+        {
+            // first check len of args
+            HTB_RAISE_IF(number_of_args != INF_NB_ARGS && long(c.size()) != number_of_args, "'" << name << "' needs " << number_of_args << " not " << c.size())
+            HTB_RAISE_IF(number_of_args == AT_LEAST_1_ARGS && long(c.size()) < 1, "'" << name << "' needs at least 1 argument not " << c.size())
+            HTB_RAISE_IF(number_of_args == AT_LEAST_2_ARGS && long(c.size()) < 2, "'" << name << "' needs at least 2 arguments not " << c.size())
+            HTB_RAISE_IF(number_of_args == BETWEEN_0_1_ARGS && long(c.size()) > 1, "'" << name << "' needs 1 or 0 argument, not " << c.size())
+            HTB_RAISE_IF(number_of_args == BETWEEN_0_2_ARGS && long(c.size()) > 2, "'" << name << "' needs between 0 and 2 arguments, not " << c.size())
+            // then check if all arguments are not exceptions
+            if (number_of_args > 0)
+                for (long i=0; i < number_of_args; ++i)
+                {
+                    HTB_HANDLE_EXCEPTION(c[i])
+                }
+            // finally exec the procedure
+            return proc(c);
+        }
 
         cell get_in(const std::string& key)
         {
-            RAISE_IF(type != Dict, "Can not access a sub element because the object is not a dict")
-            RAISE_IF(dict.empty(), "Can not access an element with the key " << key << " because the dict is empty")
-            RAISE_IF(dict.find(key) == dict.end(), "Can not find the key " << key << " in the dict")
+            HTB_RAISE_IF(type != Dict, "Can not access a sub element because the object is not a dict")
+            HTB_RAISE_IF(dict.empty(), "Can not access an element with the key " << key << " because the dict is empty")
+            HTB_RAISE_IF(dict.find(key) == dict.end(), "Can not find the key " << key << " in the dict")
 
             return dict[key];
         }
 
         cell get_in(long n)
         {
-            RAISE_IF(type != List, "Can not access a sub element because the object is not a list")
-            RAISE_IF(n >= long(list.size()), "Can not find the " << n << "th element in the list")
+            HTB_RAISE_IF(type != List, "Can not access a sub element because the object is not a list")
+            HTB_RAISE_IF(n >= long(list.size()), "Can not find the " << n << "th element in the list")
 
             return list[n];
         }
@@ -91,9 +136,6 @@ namespace htb
             return !(r == *this);
         }
     };  // struct cell
-
-    typedef std::vector<cell> cells;
-    typedef cells::const_iterator cellit;
 
     const cell false_sym(Symbol, "false");
     const cell true_sym(Symbol, "true"); // anything that isn't false_sym is true_sym
@@ -119,6 +161,9 @@ namespace htb
             isfile(false)
             , outer_(outer)
         {
+            if (parms.size() != args.size())
+                throw std::runtime_error("Not as much arguments given as parameters expected");
+
             cellit a = args.begin();
             for (cellit p = parms.begin(); p != parms.end(); ++p)
             {
@@ -213,5 +258,13 @@ namespace htb
         map errors;
         std::map<std::string, environment*> namespaces;
     };  // struct environment
+
+    namespace types
+    {
+
+        using ret = cell;
+        using args = const cells&;
+
+    }  // namespace types
 
 } // namespace htb
