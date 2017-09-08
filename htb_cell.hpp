@@ -100,15 +100,6 @@ namespace htb
             HTB_RAISE_IF(number_of_args == AT_LEAST_2_ARGS && long(c.size()) < 2, "'" << name << "' needs at least 2 arguments not " << c.size())
             HTB_RAISE_IF(number_of_args == BETWEEN_0_1_ARGS && long(c.size()) > 1, "'" << name << "' needs 0 to 1 argument, not " << c.size())
             HTB_RAISE_IF(number_of_args == BETWEEN_0_2_ARGS && long(c.size()) > 2, "'" << name << "' needs 0 to 2 arguments, not " << c.size())
-            // then check if all arguments are not exceptions
-            if (number_of_args > 0)
-            {
-                for (cellit i = c.begin(); i != c.end(); ++i)
-                {
-                    HTB_HANDLE_EXCEPTION((*i))
-                    std::cout << internal::convert_htbtype(i->type) << std::endl;
-                }
-            }
             // finally exec the procedure
             return proc(c);
         }

@@ -202,7 +202,10 @@ namespace htb
         cell proc(eval(x.list[0], env));
         cells exps;
         for (cell::iter exp = x.list.begin() + 1; exp != x.list.end(); ++exp)
+        {
             exps.push_back(eval(*exp, env));
+            HTB_HANDLE_EXCEPTION(exps[exps.size() - 1])
+        }
         if (proc.type == Lambda)
         {
             // Create an environment for the execution of this lambda function
