@@ -30,8 +30,8 @@
 #include <random>
 #include <unordered_map>
 
-#include "ext_lib/termcolor/termcolor.hpp"
-#include "ext_lib/fmt/format.hpp"
+#include "external/termcolor/termcolor.hpp"
+#include "external/fmt/format.hpp"
 
 #define EXITSUCCESS 0x0
 #define EXITFAILURE 0x1
