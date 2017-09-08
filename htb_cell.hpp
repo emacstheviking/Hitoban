@@ -94,11 +94,12 @@ namespace htb
         cell exec(const cells& c, const std::string& name)
         {
             // first check len of args
-            HTB_RAISE_IF(number_of_args != INF_NB_ARGS && long(c.size()) != number_of_args, "'" << name << "' needs " << number_of_args << " not " << c.size())
+            //                          >= 0 means it's not a special code
+            HTB_RAISE_IF(number_of_args >= 0 && long(c.size()) != number_of_args, "'" << name << "' needs " << number_of_args << " argument(s) not " << c.size())
             HTB_RAISE_IF(number_of_args == AT_LEAST_1_ARGS && long(c.size()) < 1, "'" << name << "' needs at least 1 argument not " << c.size())
             HTB_RAISE_IF(number_of_args == AT_LEAST_2_ARGS && long(c.size()) < 2, "'" << name << "' needs at least 2 arguments not " << c.size())
-            HTB_RAISE_IF(number_of_args == BETWEEN_0_1_ARGS && long(c.size()) > 1, "'" << name << "' needs 1 or 0 argument, not " << c.size())
-            HTB_RAISE_IF(number_of_args == BETWEEN_0_2_ARGS && long(c.size()) > 2, "'" << name << "' needs between 0 and 2 arguments, not " << c.size())
+            HTB_RAISE_IF(number_of_args == BETWEEN_0_1_ARGS && long(c.size()) > 1, "'" << name << "' needs 0 to 1 argument, not " << c.size())
+            HTB_RAISE_IF(number_of_args == BETWEEN_0_2_ARGS && long(c.size()) > 2, "'" << name << "' needs 0 to 2 arguments, not " << c.size())
             // then check if all arguments are not exceptions
             if (number_of_args > 0)
                 for (long i=0; i < number_of_args; ++i)
@@ -161,8 +162,10 @@ namespace htb
             isfile(false)
             , outer_(outer)
         {
-            if (parms.size() != args.size())
-                throw std::runtime_error("Not as much arguments given as parameters expected");
+            if (args.size() > parms.size())
+                throw std::runtime_error("Too much arguments, got " + internal::str(args.size()) + " expected " + internal::str(parms.size()));
+            else if (args.size() < parms.size())
+                throw std::runtime_error("Too few arguments, got " + internal::str(args.size()) + " expected " + internal::str(parms.size()));
 
             cellit a = args.begin();
             for (cellit p = parms.begin(); p != parms.end(); ++p)

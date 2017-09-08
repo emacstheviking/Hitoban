@@ -142,6 +142,15 @@ namespace htb
             TEST("(str-format \"{0} walked up {1} miles and saw {2} and {0}\" \"a bear\" 20 \"an eagle\")", "<Exception> specifier index not ordered");
             TEST("(str-format \"{0} walked up {1} miles and saw {2}\" \"a bear\" 20 \"an eagle\")", "\"a bear walked up 20 miles and saw an eagle\"");
 
+            // number of arguments verification
+            TEST("(abs)", "<Exception> Too few arguments, got 0 expected 1");
+            TEST("(abs 1 2)", "<Exception> Too much arguments, got 2 expected 1");
+            TEST("(keys)", "<Exception> 'keys' needs 1 argument(s) not 0");
+            TEST("(cond)", "<Exception> 'cond' needs at least 1 argument not 0");
+            TEST("(<= 1)", "<Exception> '<=' needs at least 2 arguments not 1");
+            TEST("(input 1 2 3)", "<Exception> 'input' needs 0 to 1 argument, not 3");
+            TEST("(random 4 5 6 7)", "<Exception> 'random' needs 0 to 2 arguments, not 4");
+
             std::cout << std::endl
                             << "========================================" << std::endl
                             << "Total tests " << g_test_count
