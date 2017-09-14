@@ -8,7 +8,6 @@
 #pragma once
 
 #include "hitoban.hpp"
-#include "htb_defines.hpp"
 
 // write a message to std::cout if value != expected_value
 #define TEST_EQUAL(value, expected_value, litteral_value) test_equal_(value, expected_value, litteral_value, __FILE__, __LINE__)

@@ -13,7 +13,6 @@
 #include "htb_internal.hpp"
 #include "htb_version.hpp"
 #include "htb_types.hpp"
-#include "htb_defines.hpp"
 
 namespace htb
 {
