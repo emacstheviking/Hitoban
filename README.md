@@ -32,7 +32,7 @@ See a demo in video right there :
 ```
 (def fibo (lambda (x)
     (if
-        (<= x 1) ; condition
+        (<= x 2) ; condition
         1        ; then
         (+                  ; add fibo(x-1) and fibo(x-2)
             (fibo (- x 1))
@@ -42,8 +42,8 @@ See a demo in video right there :
     ) ; end of lambda
 ) ; end of definition
 
-(fibo 5)  ; => 8
-(fibo 20) ; => 10946
+(fibo 5)  ; => 5
+(fibo 20) ; => 6795
 ```
 
 ## How to execute a Hitoban file ▶️
