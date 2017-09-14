@@ -283,6 +283,8 @@ int start_repl()
     return EXITSUCCESS;
 }
 
+#ifndef HTB_TESTS_INCLUDED
+// dirty trick to add a main only if we did not compiled with the tests
 int main(int argc, char *argv[])
 {
     if (argc < 2)  // we just started the program as a normal one, launch the read-eval-print-loop
@@ -302,7 +304,6 @@ int main(int argc, char *argv[])
                             << "-t      : print all the details of the execution" << std::endl
                             << "-v      : print the Hitoban version number and exit" << std::endl
                             << "file    : program read from script file" << std::endl
-                            << "tests   : launch all the tests and print how many passed, then exit" << std::endl
                             << "args... : arguments passed to program in ARGS" << std::endl
                             ;
             return EXITSUCCESS;
@@ -336,8 +337,6 @@ int main(int argc, char *argv[])
             htb::print_shell_headers();
             return EXITSUCCESS;
         }
-        if (input == "tests")  // running the tests
-            return htb::tests::tests();
 
         // if we are here, we have a filename passed as an argument
         if (htb::internal::check_if_file_exists(input))
@@ -380,3 +379,4 @@ int main(int argc, char *argv[])
 
     return EXITSUCCESS;
 }
+#endif

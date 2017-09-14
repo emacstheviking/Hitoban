@@ -11,9 +11,9 @@
 #include "htb_cell.hpp"
 #include "htb_stdlib.hpp"
 #include "htb_internal.hpp"
-#include "htb_tests.hpp"
 #include "htb_version.hpp"
 #include "htb_types.hpp"
+#include "htb_defines.hpp"
 
 namespace htb
 {

@@ -5,7 +5,7 @@
 * License MIT
 */
 
-#include "hitoban.hpp"
+#include "htb_tests.hpp"
 
 namespace htb
 {
@@ -163,3 +163,10 @@ namespace htb
     }  // namespace tests
 
 }  // namespace htb
+
+#ifdef HTB_TESTS_INCLUDED
+int main()
+{
+    return htb::tests::tests();
+}
+#endif
