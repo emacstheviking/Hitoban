@@ -27,6 +27,25 @@ See a demo in video right there :
 
 # Using Hitoban
 
+## Quick start
+
+```
+(def fibo (lambda (x)
+    (if
+        (<= x 1) ; condition
+        1        ; then
+        (+                  ; add fibo(x-1) and fibo(x-2)
+            (fibo (- x 1))
+            (fibo (- x 2))
+        )  ; end of addition
+    ) ; end of if
+    ) ; end of lambda
+) ; end of definition
+
+(fibo 5)  ; => 8
+(fibo 20) ; => 10946
+```
+
 ## How to execute a Hitoban file ▶️
 
 `./hitoban [file path here] [args]`
