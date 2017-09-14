@@ -138,7 +138,7 @@ namespace htb
             TEST("(str-reverse \"hello\")", "\"olleh\"");
             TEST("(str-cat \"hello \" \"world\")", "\"hello world\"");
             TEST("(str-eq \"hello\" \"hello\")", "true");
-            //TEST("(str-eq \"hello\" \"Æ\"", "false");  // not yet supporting UTF-8 strings
+            TEST("(str-eq \"hello\" \"Æ\")", "false");
             TEST("(str-format \"{0} walked up {1} miles and saw {2} and {0}\" \"a bear\" 20 \"an eagle\")", "<Exception> specifier index not ordered");
             TEST("(str-format \"{0} walked up {1} miles and saw {2}\" \"a bear\" 20 \"an eagle\")", "\"a bear walked up 20 miles and saw an eagle\"");
 

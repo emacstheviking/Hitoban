@@ -4,7 +4,7 @@
 namespace htb{
 	
 	//Date Version Types
-	static const char VER_DATE[] = "08";
+	static const char VER_DATE[] = "14";
 	static const char VER_MONTH[] = "09";
 	static const char VER_YEAR[] = "2017";
 	static const char VER_UBUNTU_VERSION_STYLE[] =  "17.09";
@@ -16,17 +16,17 @@ namespace htb{
 	//Standard Version Type
 	static const long VER_MAJOR  = 1;
 	static const long VER_MINOR  = 9;
-	static const long VER_BUILD  = 14;
-	static const long VER_REVISION  = 614;
+	static const long VER_BUILD  = 15;
+	static const long VER_REVISION  = 615;
 	
 	//Miscellaneous Version Types
-	static const long VER_BUILDS_COUNT  = 732;
-	#define VER_RC_FILEVERSION 1,9,14,614
-	#define VER_RC_FILEVERSION_STRING "1, 9, 14, 614\0"
-	static const char VER_FULLVERSION_STRING [] = "1.9.14.614";
+	static const long VER_BUILDS_COUNT  = 733;
+	#define VER_RC_FILEVERSION 1,9,15,615
+	#define VER_RC_FILEVERSION_STRING "1, 9, 15, 615\0"
+	static const char VER_FULLVERSION_STRING [] = "1.9.15.615";
 	
 	//These values are to keep track of your versioning state, don't modify them.
-	static const long VER_BUILD_HISTORY  = 3;
+	static const long VER_BUILD_HISTORY  = 4;
 	
 
 }
