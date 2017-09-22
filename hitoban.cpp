@@ -248,7 +248,7 @@ namespace htb
         return result;
     }
 
-    cell create_function(proc_type p, int n)
+    cell create_function(proc_type p, long n)
     {
         return cell(p, n);
     }

@@ -44,7 +44,7 @@ OBJ_DEBUG = $(OBJDIR_DEBUG)/htb_tests.o $(OBJDIR_DEBUG)/htb_stdlib.o $(OBJDIR_DE
 
 OBJ_RELEASE = $(OBJDIR_RELEASE)/htb_stdlib.o $(OBJDIR_RELEASE)/htb_shell.o $(OBJDIR_RELEASE)/htb_internal.o $(OBJDIR_RELEASE)/hitoban.o $(OBJDIR_RELEASE)/external/fmt/format.o
 
-all: release
+all: release tests
 
 clean: clean_debug clean_release
 

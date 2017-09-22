@@ -23,6 +23,6 @@ namespace htb
     cell run_string(const std::string& code, environment* env);
     void repl(const std::string& prompt, environment* env);
     void print_shell_headers();
-    cell create_function(proc_type p, int n=-1);
+    cell create_function(proc_type p, long n=INF_NB_ARGS);
 
 }  // namespace htb
