@@ -131,8 +131,8 @@ total tests 77, total failures 0
 
 # Proposal for enhancement 🔮
 
-If you have any idea to improve the language, please open an issue and tag it as `PFP` (Proposal For Enhancement). <!-- We will try to review as soon as possible, and if
-your PFP is accepted (and developed by the way), it will be published under https://kyatchioru.tk/Hitoban/PFP -->
+If you have any idea to improve the language, please open an issue and tag it as `PFE` (Proposal For Enhancement). <!-- We will try to review as soon as possible, and if
+your PFE is accepted (and developed by the way), it will be published under https://kyatchioru.tk/Hitoban/PFE -->
 
 # Copyright and license 🔓
 
